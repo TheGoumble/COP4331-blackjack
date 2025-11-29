@@ -1,0 +1,267 @@
+package network;
+
+import command.Command;
+import model.GameEngine;
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+/**
+ * Designated host that validates and executes commands
+ * Acts as the authoritative server for the game
+ * 
+ * @author Javier Vargas, Group 12
+ */
+public class DesignatedHost {
+    private final GameEngine gameEngine;
+    private final List<ClientPeer> connectedClients;
+    private final String hostId;
+    private ServerSocket serverSocket;
+    private Thread acceptThread;
+    private boolean running;
+    private final int port;
+    
+    public DesignatedHost(String hostId) {
+        this.hostId = hostId;
+        this.gameEngine = new GameEngine();
+        this.connectedClients = new CopyOnWriteArrayList<>();
+        this.port = findAvailablePort();
+        this.running = false;
+        startServer();
+    }
+    
+    /**
+     * Find an available port for the server
+     */
+    private int findAvailablePort() {
+        try (ServerSocket tempSocket = new ServerSocket(0)) {
+            return tempSocket.getLocalPort();
+        } catch (IOException e) {
+            return 25565; // Default fallback port
+        }
+    }
+    
+    /**
+     * Start the server and listen for connections
+     */
+    private void startServer() {
+        try {
+            serverSocket = new ServerSocket(port);
+            running = true;
+            
+            String hostAddress = InetAddress.getLocalHost().getHostAddress();
+            System.out.println("[HOST] Server started on " + hostAddress + ":" + port);
+            
+            // Start accepting connections in a background thread
+            acceptThread = new Thread(this::acceptConnections);
+            acceptThread.setDaemon(true);
+            acceptThread.start();
+            
+        } catch (IOException e) {
+            System.err.println("[HOST] Failed to start server: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Accept incoming client connections
+     */
+    private void acceptConnections() {
+        while (running) {
+            try {
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("[HOST] New client connection from " + clientSocket.getInetAddress());
+                
+                // Handle this client in a separate thread
+                Thread clientThread = new Thread(() -> handleClientConnection(clientSocket));
+                clientThread.setDaemon(true);
+                clientThread.start();
+                
+            } catch (IOException e) {
+                if (running) {
+                    System.err.println("[HOST] Error accepting connection: " + e.getMessage());
+                }
+            }
+        }
+    }
+    
+    /**
+     * Handle a client connection
+     */
+    private void handleClientConnection(Socket socket) {
+        try {
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            
+            // Read the client's user ID
+            String userId = (String) in.readObject();
+            System.out.println("[HOST] Client identified as: " + userId);
+            
+            // Create a ClientPeer for this connection
+            ClientPeer client = new ClientPeer(userId, socket, in, out);
+            registerClient(client);
+            
+            // Listen for commands from this client
+            while (running && !socket.isClosed()) {
+                try {
+                    Object obj = in.readObject();
+                    if (obj instanceof Command) {
+                        validateAndExecute((Command) obj);
+                    }
+                } catch (EOFException | SocketException e) {
+                    // Client disconnected
+                    break;
+                }
+            }
+            
+            // Client disconnected
+            unregisterClient(client);
+            socket.close();
+            
+        } catch (Exception e) {
+            System.err.println("[HOST] Error handling client: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Register a client peer connection
+     */
+    public void registerClient(ClientPeer client) {
+        connectedClients.add(client);
+        
+        // Add player to game engine
+        gameEngine.addPlayer(client.getUserId(), 10000);
+        
+        // Notify all clients of new player
+        broadcast(new GameUpdateMessage(
+            GameUpdateMessage.MessageType.PLAYER_JOINED,
+            client.getUserId()
+        ));
+    }
+    
+    /**
+     * Unregister a client peer connection
+     */
+    public void unregisterClient(ClientPeer client) {
+        connectedClients.remove(client);
+        gameEngine.removePlayer(client.getUserId());
+        
+        broadcast(new GameUpdateMessage(
+            GameUpdateMessage.MessageType.PLAYER_LEFT,
+            client.getUserId()
+        ));
+    }
+    
+    /**
+     * Validate and execute a command from a client
+     */
+    public void validateAndExecute(Command command) {
+        try {
+            // Execute command on game engine
+            command.execute(gameEngine);
+            
+            // Determine message type based on command
+            GameUpdateMessage.MessageType msgType = 
+                command.getClass().getSimpleName().equals("HitCommand") ? 
+                    GameUpdateMessage.MessageType.PLAYER_HIT :
+                command.getClass().getSimpleName().equals("StandCommand") ?
+                    GameUpdateMessage.MessageType.PLAYER_STAND :
+                    GameUpdateMessage.MessageType.BET_PLACED;
+            
+            // Broadcast update to all clients
+            broadcast(new GameUpdateMessage(msgType, command.getPlayerId()));
+            
+            // Check if all players have finished
+            if (gameEngine.allPlayersFinished() && gameEngine.isRoundInProgress()) {
+                playDealerTurn();
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Command execution failed: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Play dealer's turn and end the round
+     */
+    private void playDealerTurn() {
+        gameEngine.playDealerTurn();
+        broadcast(new GameUpdateMessage(
+            GameUpdateMessage.MessageType.DEALER_TURN,
+            gameEngine.getDealerHand()
+        ));
+        
+        // Determine results
+        var results = gameEngine.determineResults();
+        broadcast(new GameUpdateMessage(
+            GameUpdateMessage.MessageType.ROUND_ENDED,
+            results
+        ));
+    }
+    
+    /**
+     * Start a new round
+     */
+    public void startRound() {
+        gameEngine.startRound();
+        broadcast(new GameUpdateMessage(
+            GameUpdateMessage.MessageType.ROUND_STARTED,
+            null
+        ));
+    }
+    
+    /**
+     * Broadcast a message to all connected clients
+     */
+    public void broadcast(GameUpdateMessage message) {
+        for (ClientPeer client : connectedClients) {
+            client.receiveGameUpdate(message);
+        }
+    }
+    
+    /**
+     * Shutdown the server
+     */
+    public void shutdown() {
+        running = false;
+        try {
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close();
+            }
+            if (acceptThread != null) {
+                acceptThread.interrupt();
+            }
+            // Disconnect all clients
+            for (ClientPeer client : new ArrayList<>(connectedClients)) {
+                client.disconnect();
+            }
+        } catch (IOException e) {
+            System.err.println("[HOST] Error shutting down server: " + e.getMessage());
+        }
+    }
+    
+    public GameEngine getGameEngine() {
+        return gameEngine;
+    }
+    
+    public String getHostId() {
+        return hostId;
+    }
+    
+    public int getConnectedClientCount() {
+        return connectedClients.size();
+    }
+    
+    public int getPort() {
+        return port;
+    }
+    
+    public String getConnectionString() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress() + ":" + port;
+        } catch (UnknownHostException e) {
+            return "localhost:" + port;
+        }
+    }
+}

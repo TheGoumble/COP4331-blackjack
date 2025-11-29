@@ -1,0 +1,142 @@
+package network;
+
+import model.Card;
+import java.util.*;
+
+/**
+ * BlackjackPeer extends ClientPeer with local game state caching
+ * Maintains a local copy of game state for UI rendering
+ * 
+ * @author Javier Vargas, Group 12
+ */
+public class BlackjackPeer extends ClientPeer {
+    private Object localGameState;
+    private Map<String, List<Card>> playerHands;
+    private Map<String, Integer> playerBalances;
+    private List<Card> dealerHand;
+    
+    public BlackjackPeer(String userId) {
+        super(userId);
+        this.playerHands = new HashMap<>();
+        this.playerBalances = new HashMap<>();
+        this.dealerHand = new ArrayList<>();
+        
+        // Register listener to update local state
+        addUpdateListener(this::updateLocalState);
+    }
+    
+    /**
+     * Connect to a host by address
+     */
+    public void connectToHost(String hostAddress, int port) {
+        super.connectToHost(hostAddress, port);
+    }
+    
+    /**
+     * Connect to a local host instance
+     */
+    @Override
+    public void connectToHost(DesignatedHost host) {
+        super.connectToHost(host);
+    }
+    
+    /**
+     * Update local game state when receiving updates from host
+     */
+    private void updateLocalState(GameUpdateMessage message) {
+        switch (message.getType()) {
+            case GAME_STATE_UPDATE:
+                // Full state update
+                if (message.getData() instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> state = (Map<String, Object>) message.getData();
+                    updateFromFullState(state);
+                }
+                break;
+                
+            case PLAYER_JOINED:
+                String joinedPlayer = (String) message.getData();
+                playerBalances.put(joinedPlayer, 10000);
+                playerHands.put(joinedPlayer, new ArrayList<>());
+                break;
+                
+            case PLAYER_LEFT:
+                String leftPlayer = (String) message.getData();
+                playerBalances.remove(leftPlayer);
+                playerHands.remove(leftPlayer);
+                break;
+                
+            case ROUND_STARTED:
+                // Clear hands for new round
+                for (String playerId : playerHands.keySet()) {
+                    playerHands.get(playerId).clear();
+                }
+                dealerHand.clear();
+                break;
+                
+            case DEALER_TURN:
+                if (message.getData() instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<Card> cards = (List<Card>) message.getData();
+                    dealerHand = new ArrayList<>(cards);
+                }
+                break;
+                
+            default:
+                // Other message types handled by UI listeners
+                break;
+        }
+    }
+    
+    /**
+     * Update from a full game state snapshot
+     */
+    @SuppressWarnings("unchecked")
+    private void updateFromFullState(Map<String, Object> state) {
+        if (state.containsKey("playerHands")) {
+            this.playerHands = (Map<String, List<Card>>) state.get("playerHands");
+        }
+        if (state.containsKey("playerBalances")) {
+            this.playerBalances = (Map<String, Integer>) state.get("playerBalances");
+        }
+        if (state.containsKey("dealerHand")) {
+            this.dealerHand = (List<Card>) state.get("dealerHand");
+        }
+    }
+    
+    /**
+     * Request full game state from host
+     * This will be handled by the server sending a full state update
+     */
+    public void requestGameState() {
+        // For now, this is a placeholder
+        // In a full implementation, we'd send a REQUEST_GAME_STATE command to the host
+        // The host would then broadcast a GAME_STATE_UPDATE message
+        System.out.println("[PEER] Game state request (not yet implemented via network)");
+    }
+    
+    // Getters for local game state
+    public Object getLocalGameState() {
+        return localGameState;
+    }
+    
+    public Map<String, List<Card>> getPlayerHands() {
+        return new HashMap<>(playerHands);
+    }
+    
+    public Map<String, Integer> getPlayerBalances() {
+        return new HashMap<>(playerBalances);
+    }
+    
+    public List<Card> getDealerHand() {
+        return new ArrayList<>(dealerHand);
+    }
+    
+    public List<Card> getMyHand() {
+        return playerHands.getOrDefault(getUserId(), new ArrayList<>());
+    }
+    
+    public int getMyBalance() {
+        return playerBalances.getOrDefault(getUserId(), 0);
+    }
+}
