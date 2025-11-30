@@ -53,7 +53,38 @@ public class DealerTableView extends BorderPane {
         setPadding(new Insets(10));
         setStyle("-fx-background-color: " + StyleConstants.GREEN_FELT + ";");
 
-        // === Betting Controls ===\n        bettingPanel.setOnBet(amount -> {\n            potAmount = amount;\n            potChipDisplay.getChildren().clear();\n            \n            if (potAmount > 0) {\n                // Create single large chip with bet amount\n                Label potChip = new Label(\"$\" + potAmount);\n                potChip.setAlignment(Pos.CENTER);\n                potChip.setMinSize(85, 85);\n                potChip.setMaxSize(85, 85);\n                potChip.setStyle(\n                    \"-fx-font-size: 20px; \" +\n                    \"-fx-font-weight: bold; \" +\n                    \"-fx-background-color: #FFD700; \" +\n                    \"-fx-text-fill: #000000; \" +\n                    \"-fx-background-radius: 50%; \" +\n                    \"-fx-border-color: #CC9900; \" +\n                    \"-fx-border-width: 3px; \" +\n                    \"-fx-border-radius: 50%; \" +\n                    \"-fx-effect: dropshadow(three-pass-box, rgba(255,215,0,0.8), 10, 0, 0, 0);\"\n                );\n                potChipDisplay.getChildren().add(potChip);\n            }\n            \n            potAmountLabel.setText(\"$\" + potAmount);\n            bettingPanel.clearBet();\n            \n            if (onBet != null) {\n                onBet.accept(amount);\n            }\n        });
+        // === Betting Controls ===
+        bettingPanel.setOnBet(amount -> {
+            potAmount = amount;
+            potChipDisplay.getChildren().clear();
+            
+            if (potAmount > 0) {
+                // Create single large chip with bet amount
+                Label potChip = new Label("$" + potAmount);
+                potChip.setAlignment(Pos.CENTER);
+                potChip.setMinSize(85, 85);
+                potChip.setMaxSize(85, 85);
+                potChip.setStyle(
+                    "-fx-font-size: 20px; " +
+                    "-fx-font-weight: bold; " +
+                    "-fx-background-color: #FFD700; " +
+                    "-fx-text-fill: #000000; " +
+                    "-fx-background-radius: 50%; " +
+                    "-fx-border-color: #CC9900; " +
+                    "-fx-border-width: 3px; " +
+                    "-fx-border-radius: 50%; " +
+                    "-fx-effect: dropshadow(three-pass-box, rgba(255,215,0,0.8), 10, 0, 0, 0);"
+                );
+                potChipDisplay.getChildren().add(potChip);
+            }
+            
+            potAmountLabel.setText("$" + potAmount);
+            bettingPanel.clearBet();
+            
+            if (onBet != null) {
+                onBet.accept(amount);
+            }
+        });
         
         // Left panel container
         VBox leftPanel = new VBox(15, bettingPanel);

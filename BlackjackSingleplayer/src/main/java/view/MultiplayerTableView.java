@@ -5,6 +5,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import util.CardVisuals;
+import util.StyleConstants;
 
 import java.util.HashMap;
 import java.util.List;
@@ -102,9 +104,9 @@ public class MultiplayerTableView extends BorderPane {
 
     private VBox createTableContent() {
         // Dealer at top
-        dealerLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: 'Arial';");
+        dealerLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: " + StyleConstants.FONT_ARIAL + ";");
         dealerCardsBox.setAlignment(Pos.CENTER);
-        dealerTotalLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: white; -fx-font-family: 'Arial';");
+        dealerTotalLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: white; -fx-font-family: " + StyleConstants.FONT_ARIAL + ";");
         
         VBox dealerBox = new VBox(5, dealerLabel, dealerCardsBox, dealerTotalLabel);
         dealerBox.setAlignment(Pos.CENTER);
@@ -123,21 +125,8 @@ public class MultiplayerTableView extends BorderPane {
     }
 
     private VBox createBettingPanel() {
-        Label betLabel = new Label("BETTING");
-        betLabel.setStyle(
-            "-fx-font-size: 16px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-text-fill: #FFD700; " +
-            "-fx-font-family: 'Arial';"
-        );
-        
-        Label selectLabel = new Label("Select Chips:");
-        selectLabel.setStyle(
-            "-fx-font-size: 12px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-text-fill: white; " +
-            "-fx-font-family: 'Arial';"
-        );
+        Label betLabel = createGoldLabel("BETTING", 16);
+        Label selectLabel = createWhiteLabel("Select Chips:", 12, true);
         
         // Chip buttons (smaller for multiplayer)
         VBox chipButtons = new VBox(6);
@@ -159,15 +148,10 @@ public class MultiplayerTableView extends BorderPane {
         chip50.setOnAction(e -> addToBet(50));
         chip100.setOnAction(e -> addToBet(100));
         
-        currentBetLabel.setStyle(
-            "-fx-font-size: 12px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-text-fill: #FFD700; " +
-            "-fx-font-family: 'Arial';"
-        );
+        currentBetLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: " + StyleConstants.GOLD + "; -fx-font-family: " + StyleConstants.FONT_ARIAL + ";");
         
-        styleButton(betButton, "#2d5016");
-        styleButton(clearBetButton, "#2d5016");
+        styleButton(betButton, StyleConstants.GREEN_FELT);
+        styleButton(clearBetButton, StyleConstants.GREEN_FELT);
         betButton.setPrefWidth(120);
         clearBetButton.setPrefWidth(120);
         
@@ -189,61 +173,30 @@ public class MultiplayerTableView extends BorderPane {
     }
 
     private VBox createInfoPanel() {
-        Label infoLabel = new Label("GAME INFO");
-        infoLabel.setStyle(
-            "-fx-font-size: 16px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-text-fill: #FFD700; " +
-            "-fx-font-family: 'Arial';"
-        );
+        Label infoLabel = createGoldLabel("GAME INFO", 16);
         
-        myBalanceLabel.setStyle(
-            "-fx-font-size: 22px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-text-fill: #90EE90; " +
-            "-fx-font-family: 'Arial'; " +
-            "-fx-padding: 5;"
-        );
+        myBalanceLabel.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: " + StyleConstants.LIGHT_GREEN + "; -fx-font-family: " + StyleConstants.FONT_ARIAL + "; -fx-padding: 5;");
         myBalanceLabel.setWrapText(true);
         myBalanceLabel.setMaxWidth(150);
         
-        gameCodeLabel.setStyle(
-            "-fx-font-size: 11px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-text-fill: white; " +
-            "-fx-font-family: 'Arial'; " +
-            "-fx-padding: 5;"
-        );
+        gameCodeLabel.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: " + StyleConstants.FONT_ARIAL + "; -fx-padding: 5;");
         gameCodeLabel.setWrapText(true);
         gameCodeLabel.setMaxWidth(150);
         
-        turnIndicatorLabel.setStyle(
-            "-fx-font-size: 12px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-text-fill: #FFD700; " +
-            "-fx-font-family: 'Arial'; " +
-            "-fx-padding: 5;"
-        );
+        turnIndicatorLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: " + StyleConstants.GOLD + "; -fx-font-family: " + StyleConstants.FONT_ARIAL + "; -fx-padding: 5;");
         turnIndicatorLabel.setWrapText(true);
         turnIndicatorLabel.setMaxWidth(150);
         
-        statusLabel.setStyle(
-            "-fx-font-size: 11px; " +
-            "-fx-text-fill: white; " +
-            "-fx-font-family: 'Arial'; " +
-            "-fx-padding: 5;"
-        );
+        statusLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: white; -fx-font-family: " + StyleConstants.FONT_ARIAL + "; -fx-padding: 5;");
         statusLabel.setWrapText(true);
         statusLabel.setMaxWidth(150);
         
-        Region separator1 = new Region();
-        separator1.setStyle("-fx-background-color: rgba(255,255,255,0.3); -fx-pref-height: 2;");
-        separator1.setMaxWidth(140);
+        Region separator1 = createSeparator(140);
         
         // Game action buttons
-        styleButton(hitButton, "#2d5016");
-        styleButton(standButton, "#2d5016");
-        styleButton(startRoundButton, "#2d5016");
+        styleButton(hitButton, StyleConstants.GREEN_FELT);
+        styleButton(standButton, StyleConstants.GREEN_FELT);
+        styleButton(startRoundButton, StyleConstants.GREEN_FELT);
         hitButton.setPrefWidth(140);
         standButton.setPrefWidth(140);
         startRoundButton.setPrefWidth(140);
@@ -251,13 +204,8 @@ public class MultiplayerTableView extends BorderPane {
         VBox actionButtons = new VBox(6, hitButton, standButton, startRoundButton);
         actionButtons.setAlignment(Pos.CENTER);
         
-        Region separator2 = new Region();
-        separator2.setStyle("-fx-background-color: rgba(255,255,255,0.3); -fx-pref-height: 2;");
-        separator2.setMaxWidth(140);
-        
-        Region separator3 = new Region();
-        separator3.setStyle("-fx-background-color: rgba(255,255,255,0.3); -fx-pref-height: 2;");
-        separator3.setMaxWidth(140);
+        Region separator2 = createSeparator(140);
+        Region separator3 = createSeparator(140);
         
         styleButton(backToMenuButton, "#8B0000");
         backToMenuButton.setPrefWidth(140);
@@ -292,100 +240,55 @@ public class MultiplayerTableView extends BorderPane {
     }
 
     private Button createChipButton(int value, String bgColor, String textColor) {
-        String fontSize = value >= 100 ? "9px" : "10px";
-        String fontSizeHover = value >= 100 ? "10px" : "11px";
-        
         Button chip = new Button("$" + value);
-        chip.setStyle(
-            "-fx-font-size: " + fontSize + "; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: " + bgColor + "; " +
-            "-fx-text-fill: " + textColor + "; " +
-            "-fx-padding: 12; " +
-            "-fx-background-radius: 50%; " +
-            "-fx-min-width: 50px; " +
-            "-fx-min-height: 50px; " +
-            "-fx-max-width: 50px; " +
-            "-fx-max-height: 50px; " +
-            "-fx-cursor: hand; " +
-            "-fx-border-color: #FFD700; " +
-            "-fx-border-width: 2px; " +
-            "-fx-border-radius: 50%; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 5, 0, 2, 2);"
-        );
+        String normalStyle = buildChipStyle(value, bgColor, textColor, false);
+        String hoverStyle = buildChipStyle(value, bgColor, textColor, true);
         
-        chip.setOnMouseEntered(e -> chip.setStyle(
-            "-fx-font-size: " + fontSizeHover + "; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: " + bgColor + "; " +
-            "-fx-text-fill: " + textColor + "; " +
-            "-fx-padding: 12; " +
-            "-fx-background-radius: 50%; " +
-            "-fx-min-width: 50px; " +
-            "-fx-min-height: 50px; " +
-            "-fx-max-width: 50px; " +
-            "-fx-max-height: 50px; " +
-            "-fx-cursor: hand; " +
-            "-fx-border-color: #FFD700; " +
-            "-fx-border-width: 3px; " +
-            "-fx-border-radius: 50%; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(255,215,0,0.7), 8, 0, 0, 0);"
-        ));
-        
-        chip.setOnMouseExited(e -> chip.setStyle(
-            "-fx-font-size: " + fontSize + "; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: " + bgColor + "; " +
-            "-fx-text-fill: " + textColor + "; " +
-            "-fx-padding: 12; " +
-            "-fx-background-radius: 50%; " +
-            "-fx-min-width: 50px; " +
-            "-fx-min-height: 50px; " +
-            "-fx-max-width: 50px; " +
-            "-fx-max-height: 50px; " +
-            "-fx-cursor: hand; " +
-            "-fx-border-color: #FFD700; " +
-            "-fx-border-width: 2px; " +
-            "-fx-border-radius: 50%; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 5, 0, 2, 2);"
-        ));
+        chip.setStyle(normalStyle);
+        chip.setOnMouseEntered(e -> chip.setStyle(hoverStyle));
+        chip.setOnMouseExited(e -> chip.setStyle(normalStyle));
         
         return chip;
     }
     
-    private void styleButton(Button button, String color) {
-        button.setStyle(
-            "-fx-font-size: 12px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: " + color + "; " +
-            "-fx-text-fill: white; " +
-            "-fx-padding: 8 15 8 15; " +
-            "-fx-background-radius: 5; " +
-            "-fx-cursor: hand; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+    private String buildChipStyle(int value, String bgColor, String textColor, boolean hover) {
+        String fontSize = value >= 100 ? (hover ? "10px" : "9px") : (hover ? "11px" : "10px");
+        String borderWidth = hover ? "3px" : "2px";
+        String effect = hover ? 
+            "dropshadow(three-pass-box, rgba(255,215,0,0.7), 8, 0, 0, 0)" :
+            "dropshadow(three-pass-box, rgba(0,0,0,0.5), 5, 0, 2, 2)";
+        
+        return String.format(
+            "-fx-font-size: %s; -fx-font-weight: bold; -fx-background-color: %s; " +
+            "-fx-text-fill: %s; -fx-padding: 12; -fx-background-radius: 50%%; " +
+            "-fx-min-width: 50px; -fx-min-height: 50px; -fx-max-width: 50px; -fx-max-height: 50px; " +
+            "-fx-cursor: hand; -fx-border-color: %s; -fx-border-width: %s; " +
+            "-fx-border-radius: 50%%; -fx-effect: %s;",
+            fontSize, bgColor, textColor, StyleConstants.GOLD, borderWidth, effect
         );
+    }
+    
+    private void styleButton(Button button, String color) {
+        String normalStyle = buildButtonStyle(color, false);
+        String hoverStyle = buildButtonStyle(color, true);
         
-        button.setOnMouseEntered(e -> button.setStyle(
-            "-fx-font-size: 12px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: derive(" + color + ", 20%); " +
-            "-fx-text-fill: white; " +
-            "-fx-padding: 8 15 8 15; " +
-            "-fx-background-radius: 5; " +
-            "-fx-cursor: hand; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 8, 0, 3, 3);"
-        ));
+        button.setStyle(normalStyle);
+        button.setOnMouseEntered(e -> button.setStyle(hoverStyle));
+        button.setOnMouseExited(e -> button.setStyle(normalStyle));
+    }
+    
+    private String buildButtonStyle(String color, boolean hover) {
+        String bgColor = hover ? "derive(" + color + ", 20%)" : color;
+        String effect = hover ?
+            "dropshadow(three-pass-box, rgba(0,0,0,0.5), 8, 0, 3, 3)" :
+            "dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2)";
         
-        button.setOnMouseExited(e -> button.setStyle(
-            "-fx-font-size: 12px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: " + color + "; " +
-            "-fx-text-fill: white; " +
-            "-fx-padding: 8 15 8 15; " +
-            "-fx-background-radius: 5; " +
-            "-fx-cursor: hand; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
-        ));
+        return String.format(
+            "-fx-font-size: 12px; -fx-font-weight: bold; -fx-background-color: %s; " +
+            "-fx-text-fill: white; -fx-padding: 8 15 8 15; -fx-background-radius: 5; " +
+            "-fx-cursor: hand; -fx-effect: %s;",
+            bgColor, effect
+        );
     }
 
     private void addToBet(int amount) {
@@ -413,23 +316,16 @@ public class MultiplayerTableView extends BorderPane {
 
         for (int i = 0; i < cards.size(); i++) {
             if (i == 1 && !showAll) {
-                dealerCardsBox.getChildren().add(createHiddenCard());
+                dealerCardsBox.getChildren().add(CardVisuals.createHiddenCard());
             } else {
                 Card card = cards.get(i);
-                dealerCardsBox.getChildren().add(createCardSymbol(
-                    card.suit().symbol(),
-                    card.rank().symbol(),
-                    card.suit().isRed() ? "red" : "black"
-                ));
+                String color = card.suit().isRed() ? "red" : "black";
+                dealerCardsBox.getChildren().add(CardVisuals.createCardSymbol(card.suit().symbol(), card.rank().symbol(), color));
                 total += card.baseValue();
             }
         }
 
-        if (showAll) {
-            dealerTotalLabel.setText("Total: " + total);
-        } else {
-            dealerTotalLabel.setText("Total: ?");
-        }
+        dealerTotalLabel.setText(showAll ? "Total: " + total : "Total: ?");
     }
 
     public void addOrUpdatePlayer(String playerId, String displayName, int balance, List<Card> cards) {
@@ -562,63 +458,28 @@ public class MultiplayerTableView extends BorderPane {
         startRoundButton.setDisable(!canStartRound);
     }
 
-    private VBox createCardSymbol(String symbol, String value, String color) {
-        Label valueLabel = new Label(value);
-        valueLabel.setStyle(
-            "-fx-font-size: 12px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-text-fill: " + color + ";"
-        );
-        valueLabel.setAlignment(Pos.CENTER);
-        
-        Label symbolLabel = new Label(symbol);
-        symbolLabel.setStyle(
-            "-fx-font-size: 18px; " +
-            "-fx-text-fill: " + color + ";"
-        );
-        symbolLabel.setAlignment(Pos.CENTER);
-        
-        VBox cardContent = new VBox(1, valueLabel, symbolLabel);
-        cardContent.setAlignment(Pos.CENTER);
-        cardContent.setStyle(
-            "-fx-border-color: #333333; " +
-            "-fx-border-width: 2px; " +
-            "-fx-border-radius: 5; " +
-            "-fx-background-color: white; " +
-            "-fx-background-radius: 5; " +
-            "-fx-padding: 6 8 6 8; " +
-            "-fx-min-width: 40px; " +
-            "-fx-min-height: 60px; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 3, 0, 1, 1);"
-        );
-        
-        return cardContent;
+    // Helper methods
+    
+    private Label createGoldLabel(String text, int fontSize) {
+        Label label = new Label(text);
+        label.setStyle(String.format("-fx-font-size: %dpx; -fx-font-weight: bold; -fx-text-fill: %s; -fx-font-family: %s;", 
+            fontSize, StyleConstants.GOLD, StyleConstants.FONT_ARIAL));
+        return label;
     }
-
-    private VBox createHiddenCard() {
-        Label hiddenLabel = new Label("?");
-        hiddenLabel.setStyle(
-            "-fx-font-size: 18px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-text-fill: white;"
-        );
-        hiddenLabel.setAlignment(Pos.CENTER);
-        
-        VBox cardContent = new VBox(hiddenLabel);
-        cardContent.setAlignment(Pos.CENTER);
-        cardContent.setStyle(
-            "-fx-border-color: #333333; " +
-            "-fx-border-width: 2px; " +
-            "-fx-border-radius: 5; " +
-            "-fx-background-color: #4169E1; " +
-            "-fx-background-radius: 5; " +
-            "-fx-padding: 6 8 6 8; " +
-            "-fx-min-width: 40px; " +
-            "-fx-min-height: 60px; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 3, 0, 1, 1);"
-        );
-        
-        return cardContent;
+    
+    private Label createWhiteLabel(String text, int fontSize, boolean bold) {
+        Label label = new Label(text);
+        String weight = bold ? "-fx-font-weight: bold; " : "";
+        label.setStyle(String.format("-fx-font-size: %dpx; %s-fx-text-fill: white; -fx-font-family: %s;",
+            fontSize, weight, StyleConstants.FONT_ARIAL));
+        return label;
+    }
+    
+    private Region createSeparator(int maxWidth) {
+        Region separator = new Region();
+        separator.setStyle("-fx-background-color: rgba(255,255,255,0.3); -fx-pref-height: 2;");
+        separator.setMaxWidth(maxWidth);
+        return separator;
     }
 
     /**
@@ -643,7 +504,7 @@ public class MultiplayerTableView extends BorderPane {
             playerEmoji.setAlignment(Pos.CENTER);
 
             nameLabel = new Label(displayName);
-            nameLabel.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: 'Arial';");
+            nameLabel.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: " + StyleConstants.FONT_ARIAL + ";");
             nameLabel.setWrapText(true);
             nameLabel.setMaxWidth(120);
             nameLabel.setAlignment(Pos.CENTER);
@@ -665,7 +526,7 @@ public class MultiplayerTableView extends BorderPane {
             );
 
             potAmountLabel = new Label("$0");
-            potAmountLabel.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #FFD700; -fx-font-family: 'Arial';");
+            potAmountLabel.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: " + StyleConstants.GOLD + "; -fx-font-family: " + StyleConstants.FONT_ARIAL + ";");
             potAmountLabel.setAlignment(Pos.CENTER);
 
             cardsBox = new HBox(2);
@@ -675,11 +536,11 @@ public class MultiplayerTableView extends BorderPane {
             cardsBox.setStyle("-fx-background-color: transparent;");
 
             totalLabel = new Label("Total: 0");
-            totalLabel.setStyle("-fx-font-size: 9px; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: 'Arial';");
+            totalLabel.setStyle("-fx-font-size: 9px; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: " + StyleConstants.FONT_ARIAL + ";");
             totalLabel.setAlignment(Pos.CENTER);
 
             balanceLabel = new Label("$0");
-            balanceLabel.setStyle("-fx-font-size: 9px; -fx-text-fill: #90EE90; -fx-font-family: 'Arial';");
+            balanceLabel.setStyle("-fx-font-size: 9px; -fx-text-fill: " + StyleConstants.LIGHT_GREEN + "; -fx-font-family: " + StyleConstants.FONT_ARIAL + ";");
             balanceLabel.setAlignment(Pos.CENTER);
 
             getChildren().addAll(playerEmoji, nameLabel, potChipDisplay, potAmountLabel, cardsBox, totalLabel, balanceLabel);
@@ -701,11 +562,8 @@ public class MultiplayerTableView extends BorderPane {
             int total = 0;
 
             for (Card card : cards) {
-                cardsBox.getChildren().add(createCardSymbol(
-                    card.suit().symbol(),
-                    card.rank().symbol(),
-                    card.suit().isRed() ? "red" : "black"
-                ));
+                String color = card.suit().isRed() ? "red" : "black";
+                cardsBox.getChildren().add(CardVisuals.createCardSymbol(card.suit().symbol(), card.rank().symbol(), color));
                 total += card.baseValue();
             }
 
@@ -725,17 +583,10 @@ public class MultiplayerTableView extends BorderPane {
                 potChip.setAlignment(Pos.CENTER);
                 potChip.setMinSize(40, 40);
                 potChip.setMaxSize(40, 40);
-                potChip.setStyle(
-                    "-fx-font-size: 10px; " +
-                    "-fx-font-weight: bold; " +
-                    "-fx-background-color: #FFD700; " +
-                    "-fx-text-fill: #000000; " +
-                    "-fx-background-radius: 50%; " +
-                    "-fx-border-color: #CC9900; " +
-                    "-fx-border-width: 2px; " +
-                    "-fx-border-radius: 50%; " +
-                    "-fx-effect: dropshadow(three-pass-box, rgba(255,215,0,0.8), 6, 0, 0, 0);"
-                );
+                potChip.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-background-color: " + StyleConstants.GOLD + "; " +
+                    "-fx-text-fill: #000000; -fx-background-radius: 50%; -fx-border-color: #CC9900; " +
+                    "-fx-border-width: 2px; -fx-border-radius: 50%; " +
+                    "-fx-effect: dropshadow(three-pass-box, rgba(255,215,0,0.8), 6, 0, 0, 0);");
                 potChipDisplay.getChildren().add(potChip);
             }
             
