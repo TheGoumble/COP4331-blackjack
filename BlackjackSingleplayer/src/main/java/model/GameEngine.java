@@ -16,8 +16,10 @@ public class GameEngine {
     private final List<Card> dealerHand;
     private final Set<String> standingPlayers;
     private final Set<String> bustedPlayers;
+    private final List<String> playerOrder; // Track join order for turns
     
     private boolean roundInProgress;
+    private int currentPlayerIndex; // Index in playerOrder for whose turn it is
     
     public GameEngine() {
         this.deck = new Deck();
@@ -27,7 +29,9 @@ public class GameEngine {
         this.dealerHand = new ArrayList<>();
         this.standingPlayers = new HashSet<>();
         this.bustedPlayers = new HashSet<>();
+        this.playerOrder = new ArrayList<>();
         this.roundInProgress = false;
+        this.currentPlayerIndex = 0;
     }
     
     /**
@@ -37,6 +41,7 @@ public class GameEngine {
         playerBalances.put(playerId, startingBalance);
         currentHands.put(playerId, new ArrayList<>());
         currentBets.put(playerId, 0);
+        playerOrder.add(playerId); // Track join order
     }
     
     /**
@@ -47,6 +52,7 @@ public class GameEngine {
         currentHands.remove(playerId);
         currentBets.remove(playerId);
         standingPlayers.remove(playerId);
+        playerOrder.remove(playerId);
     }
     
     /**
@@ -106,6 +112,7 @@ public class GameEngine {
         dealerHand.add(deck.deal());
         
         roundInProgress = true;
+        currentPlayerIndex = 0; // Start with first player in join order
         
         // Check for dealer blackjack (instant win for dealer)
         if (dealerHand.size() == 2 && calculateHandValue(dealerHand) == 21) {
@@ -135,6 +142,11 @@ public class GameEngine {
             throw new IllegalArgumentException("Player not found: " + playerId);
         }
         
+        // Check if it's this player's turn
+        if (!isPlayersTurn(playerId)) {
+            throw new IllegalStateException("Not your turn");
+        }
+        
         if (standingPlayers.contains(playerId)) {
             throw new IllegalStateException("Player has already stood");
         }
@@ -150,6 +162,7 @@ public class GameEngine {
         if (calculateHandValue(hand) > 21) {
             standingPlayers.add(playerId);
             bustedPlayers.add(playerId);
+            advanceToNextPlayer(); // Auto-advance turn when busted
         }
     }
     
@@ -165,7 +178,13 @@ public class GameEngine {
             throw new IllegalArgumentException("Player not found: " + playerId);
         }
         
+        // Check if it's this player's turn
+        if (!isPlayersTurn(playerId)) {
+            throw new IllegalStateException("Not your turn");
+        }
+        
         standingPlayers.add(playerId);
+        advanceToNextPlayer(); // Advance to next player after standing
     }
     
     /**
@@ -295,5 +314,58 @@ public class GameEngine {
     
     public int getPlayerBet(String playerId) {
         return currentBets.getOrDefault(playerId, 0);
+    }
+    
+    /**
+     * Get the ID of the player whose turn it currently is
+     * Returns null if no round in progress or all players finished
+     */
+    public String getCurrentPlayer() {
+        if (!roundInProgress || playerOrder.isEmpty()) {
+            return null;
+        }
+        if (currentPlayerIndex >= playerOrder.size()) {
+            return null; // All players finished
+        }
+        return playerOrder.get(currentPlayerIndex);
+    }
+    
+    /**
+     * Check if it's a specific player's turn
+     */
+    public boolean isPlayersTurn(String playerId) {
+        String currentPlayer = getCurrentPlayer();
+        return currentPlayer != null && currentPlayer.equals(playerId);
+    }
+    
+    /**
+     * Advance to the next player's turn
+     * Skips players who have already stood or busted
+     */
+    public void advanceToNextPlayer() {
+        if (!roundInProgress) {
+            return;
+        }
+        
+        // Move to next player
+        currentPlayerIndex++;
+        
+        // Skip players who have already stood
+        while (currentPlayerIndex < playerOrder.size()) {
+            String playerId = playerOrder.get(currentPlayerIndex);
+            if (!standingPlayers.contains(playerId)) {
+                return; // Found next active player
+            }
+            currentPlayerIndex++;
+        }
+        
+        // If we've gone through all players, no current player (ready for dealer)
+    }
+    
+    /**
+     * Get the turn order (list of player IDs in join order)
+     */
+    public List<String> getPlayerOrder() {
+        return new ArrayList<>(playerOrder);
     }
 }

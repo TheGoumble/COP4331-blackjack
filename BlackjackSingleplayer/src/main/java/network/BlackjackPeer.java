@@ -15,6 +15,7 @@ public class BlackjackPeer extends ClientPeer {
     private Map<String, Integer> playerBalances;
     private Map<String, String> playerDisplayNames; // Map userId to displayName
     private List<Card> dealerHand;
+    private String currentTurnPlayer; // Track whose turn it is
     
     public BlackjackPeer(String userId) {
         super(userId);
@@ -22,6 +23,7 @@ public class BlackjackPeer extends ClientPeer {
         this.playerBalances = new HashMap<>();
         this.playerDisplayNames = new HashMap<>();
         this.dealerHand = new ArrayList<>();
+        this.currentTurnPlayer = null;
         
         // Register listener to update local state
         addUpdateListener(this::updateLocalState);
@@ -102,6 +104,11 @@ public class BlackjackPeer extends ClientPeer {
                 }
                 break;
                 
+            case TURN_CHANGED:
+                // Update whose turn it is
+                currentTurnPlayer = (String) message.getData(); // Can be null if all players finished
+                break;
+                
             default:
                 // Other message types handled by UI listeners
                 break;
@@ -161,5 +168,13 @@ public class BlackjackPeer extends ClientPeer {
     
     public Map<String, String> getPlayerDisplayNames() {
         return new HashMap<>(playerDisplayNames);
+    }
+    
+    public String getCurrentTurnPlayer() {
+        return currentTurnPlayer;
+    }
+    
+    public boolean isMyTurn() {
+        return currentTurnPlayer != null && currentTurnPlayer.equals(getUserId());
     }
 }

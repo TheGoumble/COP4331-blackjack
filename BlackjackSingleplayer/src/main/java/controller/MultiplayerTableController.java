@@ -155,6 +155,11 @@ public class MultiplayerTableController {
                 case PLAYER_STAND:
                     view.showMessage(message.getData() + " stands");
                     break;
+                
+                case TURN_CHANGED:
+                    // Turn has changed - update UI to reflect whose turn
+                    updateUI();
+                    break;
 
                 case DEALER_TURN:
                     view.showMessage("Dealer's turn...");
@@ -231,10 +236,11 @@ public class MultiplayerTableController {
         // Update my balance
         view.updateMyBalance(peer.getMyBalance());
 
-        // Update button states based on game phase
+        // Update button states based on game phase and turn
         boolean canBet = !roundInProgress;
-        boolean canHit = roundInProgress;
-        boolean canStand = roundInProgress;
+        boolean isMyTurn = peer.isMyTurn();
+        boolean canHit = roundInProgress && isMyTurn;
+        boolean canStand = roundInProgress && isMyTurn;
         boolean canStartRound = isHost && !roundInProgress;
 
         view.setButtonsEnabled(canBet, canHit, canStand, canStartRound);
@@ -247,7 +253,18 @@ public class MultiplayerTableController {
                 view.setTurnIndicator("Waiting for host to start round");
             }
         } else {
-            view.setTurnIndicator("Your Turn - Hit or Stand!");
+            // Show whose turn it is
+            String currentTurnPlayer = peer.getCurrentTurnPlayer();
+            if (currentTurnPlayer == null) {
+                view.setTurnIndicator("All players finished - Waiting for dealer");
+            } else if (currentTurnPlayer.equals(peer.getUserId())) {
+                view.setTurnIndicator("YOUR TURN - Hit or Stand!");
+            } else {
+                // Show other player's name
+                Map<String, String> displayNames = peer.getPlayerDisplayNames();
+                String turnPlayerName = displayNames.getOrDefault(currentTurnPlayer, currentTurnPlayer);
+                view.setTurnIndicator(turnPlayerName + "'s Turn - Please wait...");
+            }
         }
     }
 }

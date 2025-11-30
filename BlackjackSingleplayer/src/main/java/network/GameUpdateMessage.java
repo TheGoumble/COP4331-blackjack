@@ -23,6 +23,7 @@ public class GameUpdateMessage implements Serializable {
         CARD_DEALT,
         PLAYER_HIT,
         PLAYER_STAND,
+        TURN_CHANGED,
         DEALER_TURN,
         ROUND_ENDED,
         GAME_STATE_UPDATE

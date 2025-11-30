@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 public class MultiplayerTableView extends BorderPane {
 
     private final Label dealerLabel = new Label("Dealer");
-    private final TextArea dealerCardsArea = new TextArea();
+    private final HBox dealerCardsBox = new HBox(8);
     private final Label dealerTotalLabel = new Label("Total: 0");
 
     private final FlowPane playersBox = new FlowPane(15, 15);
@@ -81,22 +81,13 @@ public class MultiplayerTableView extends BorderPane {
     private VBox createDealerArea() {
         dealerLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
 
-        dealerCardsArea.setEditable(false);
-        dealerCardsArea.setPrefHeight(60);
-        dealerCardsArea.setStyle(
-            "-fx-control-inner-background: white; " +
-            "-fx-background-color: white; " +
-            "-fx-border-color: #cccccc; " +
-            "-fx-border-width: 2px; " +
-            "-fx-border-radius: 8px; " +
-            "-fx-background-radius: 8px; " +
-            "-fx-font-family: 'Arial'; " +
-            "-fx-font-size: 14px;"
-        );
+        dealerCardsBox.setAlignment(Pos.CENTER);
+        dealerCardsBox.setPrefHeight(130);
+        dealerCardsBox.setStyle("-fx-background-color: transparent;");
 
         dealerTotalLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
 
-        VBox box = new VBox(10, dealerLabel, dealerCardsArea, dealerTotalLabel);
+        VBox box = new VBox(10, dealerLabel, dealerCardsBox, dealerTotalLabel);
         box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(20));
         box.setStyle(
@@ -193,21 +184,23 @@ public class MultiplayerTableView extends BorderPane {
      * Update dealer's display
      */
     public void updateDealer(List<Card> cards, boolean showAll) {
-        StringBuilder sb = new StringBuilder();
+        dealerCardsBox.getChildren().clear();
         int total = 0;
 
         for (int i = 0; i < cards.size(); i++) {
             if (i == 1 && !showAll) {
-                sb.append("[Hidden]");
+                dealerCardsBox.getChildren().add(createHiddenCard());
             } else {
                 Card card = cards.get(i);
-                sb.append(card.toString());
+                dealerCardsBox.getChildren().add(createCardSymbol(
+                    card.suit().symbol(),
+                    card.rank().symbol(),
+                    card.suit().isRed() ? "red" : "black"
+                ));
                 total += card.baseValue();
             }
-            if (i < cards.size() - 1) sb.append(", ");
         }
 
-        dealerCardsArea.setText(sb.toString());
         dealerTotalLabel.setText(showAll ? "Total: " + total : "Total: ?");
     }
 
@@ -319,37 +312,26 @@ public class MultiplayerTableView extends BorderPane {
     /**
      * Inner class for individual player display
      */
-    private static class PlayerPanel extends VBox {
+    private class PlayerPanel extends VBox {
         private final Label nameLabel;
-        private final Label cardsLabel;
+        private final HBox cardsBox;
         private final Label balanceLabel;
         private final Label totalLabel;
 
         public PlayerPanel(String playerId, String displayName) {
-            super(6);
+            super(8);
 
             nameLabel = new Label(displayName);
             nameLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
             nameLabel.setWrapText(true);
-            nameLabel.setMaxWidth(160);
+            nameLabel.setMaxWidth(200);
             nameLabel.setAlignment(Pos.CENTER);
 
-            cardsLabel = new Label("No cards");
-            cardsLabel.setWrapText(true);
-            cardsLabel.setMaxWidth(160);
-            cardsLabel.setMinHeight(55);
-            cardsLabel.setMaxHeight(55);
-            cardsLabel.setAlignment(Pos.CENTER);
-            cardsLabel.setStyle(
-                "-fx-background-color: #f9f9f9; " +
-                "-fx-border-color: #cccccc; " +
-                "-fx-border-width: 1px; " +
-                "-fx-border-radius: 6px; " +
-                "-fx-background-radius: 6px; " +
-                "-fx-font-family: 'Arial'; " +
-                "-fx-font-size: 11px; " +
-                "-fx-padding: 5;"
-            );
+            cardsBox = new HBox(4);
+            cardsBox.setAlignment(Pos.CENTER);
+            cardsBox.setMinHeight(120);
+            cardsBox.setMaxHeight(120);
+            cardsBox.setStyle("-fx-background-color: transparent;");
 
             totalLabel = new Label("Total: 0");
             totalLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
@@ -359,7 +341,7 @@ public class MultiplayerTableView extends BorderPane {
             balanceLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #555555; -fx-font-family: 'Arial';");
             balanceLabel.setAlignment(Pos.CENTER);
 
-            getChildren().addAll(nameLabel, cardsLabel, totalLabel, balanceLabel);
+            getChildren().addAll(nameLabel, cardsBox, totalLabel, balanceLabel);
             setAlignment(Pos.CENTER);
             setPadding(new Insets(12));
             setStyle(
@@ -370,26 +352,33 @@ public class MultiplayerTableView extends BorderPane {
                 "-fx-border-radius: 10; " +
                 "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 2, 2);"
             );
-            setMinWidth(180);
-            setMaxWidth(180);
-            setMinHeight(160);
-            setMaxHeight(160);
+            setMinWidth(220);
+            setMaxWidth(220);
+            setMinHeight(240);
+            setMaxHeight(240);
         }
 
         public void update(List<Card> cards, int balance, boolean isActive) {
-            StringBuilder sb = new StringBuilder();
+            cardsBox.getChildren().clear();
             int total = 0;
-            for (int i = 0; i < cards.size(); i++) {
-                Card card = cards.get(i);
-                sb.append(card.toString());
-                if (i < cards.size() - 1) sb.append(", ");
-                total += card.baseValue();
-            }
             
             if (cards.isEmpty()) {
-                cardsLabel.setText("No cards");
+                Label noCardsLabel = new Label("No cards");
+                noCardsLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #888888;");
+                cardsBox.getChildren().add(noCardsLabel);
             } else {
-                cardsLabel.setText(sb.toString());
+                for (Card card : cards) {
+                    VBox cardVisual = createCardSymbol(
+                        card.suit().symbol(),
+                        card.rank().symbol(),
+                        card.suit().isRed() ? "red" : "black"
+                    );
+                    // Scale down cards slightly for player panels
+                    cardVisual.setScaleX(0.7);
+                    cardVisual.setScaleY(0.7);
+                    cardsBox.getChildren().add(cardVisual);
+                    total += card.baseValue();
+                }
             }
             
             totalLabel.setText("Total: " + total);
@@ -422,4 +411,70 @@ public class MultiplayerTableView extends BorderPane {
             }
         }
     }
+
+    /**
+     * Creates a visual card representation
+     */
+    private VBox createCardSymbol(String symbol, String value, String color) {
+        Label valueLabel = new Label(value);
+        valueLabel.setStyle(
+            "-fx-font-size: 24px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-text-fill: " + color + ";"
+        );
+        valueLabel.setAlignment(Pos.CENTER);
+        
+        Label symbolLabel = new Label(symbol);
+        symbolLabel.setStyle(
+            "-fx-font-size: 40px; " +
+            "-fx-text-fill: " + color + ";"
+        );
+        symbolLabel.setAlignment(Pos.CENTER);
+        
+        VBox cardContent = new VBox(3, valueLabel, symbolLabel);
+        cardContent.setAlignment(Pos.CENTER);
+        cardContent.setStyle(
+            "-fx-border-color: #333333; " +
+            "-fx-border-width: 3px; " +
+            "-fx-border-radius: 8; " +
+            "-fx-background-color: white; " +
+            "-fx-background-radius: 8; " +
+            "-fx-padding: 12 20 12 20; " +
+            "-fx-min-width: 75px; " +
+            "-fx-min-height: 110px; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+        );
+        
+        return cardContent;
+    }
+
+    /**
+     * Creates a hidden (face-down) card
+     */
+    private VBox createHiddenCard() {
+        Label hiddenLabel = new Label("?");
+        hiddenLabel.setStyle(
+            "-fx-font-size: 32px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-text-fill: white;"
+        );
+        hiddenLabel.setAlignment(Pos.CENTER);
+        
+        VBox cardContent = new VBox(hiddenLabel);
+        cardContent.setAlignment(Pos.CENTER);
+        cardContent.setStyle(
+            "-fx-border-color: #333333; " +
+            "-fx-border-width: 3px; " +
+            "-fx-border-radius: 8; " +
+            "-fx-background-color: #4169E1; " +
+            "-fx-background-radius: 8; " +
+            "-fx-padding: 12 20 12 20; " +
+            "-fx-min-width: 75px; " +
+            "-fx-min-height: 110px; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+        );
+        
+        return cardContent;
+    }
 }
+

@@ -1,10 +1,14 @@
 package model;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Bridjet Walker
  */
-public class Card {
+public class Card implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private final Suit suit;
     private final Rank rank;
 

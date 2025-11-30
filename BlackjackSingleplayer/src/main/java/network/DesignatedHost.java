@@ -201,6 +201,19 @@ public class DesignatedHost {
             // Broadcast update to all clients
             broadcast(new GameUpdateMessage(msgType, command.getPlayerId()));
             
+            // Broadcast updated game state so all clients see the changes
+            broadcastGameState();
+            
+            // Broadcast turn change if turn advanced (for Hit/Stand commands)
+            if (msgType == GameUpdateMessage.MessageType.PLAYER_HIT || 
+                msgType == GameUpdateMessage.MessageType.PLAYER_STAND) {
+                String currentPlayer = gameEngine.getCurrentPlayer();
+                broadcast(new GameUpdateMessage(
+                    GameUpdateMessage.MessageType.TURN_CHANGED,
+                    currentPlayer // null if all players finished
+                ));
+            }
+            
             // Check if all players have finished
             if (gameEngine.allPlayersFinished() && gameEngine.isRoundInProgress()) {
                 playDealerTurn();
@@ -238,6 +251,16 @@ public class DesignatedHost {
             GameUpdateMessage.MessageType.ROUND_STARTED,
             null
         ));
+        
+        // Broadcast whose turn it is (first player)
+        String firstPlayer = gameEngine.getCurrentPlayer();
+        broadcast(new GameUpdateMessage(
+            GameUpdateMessage.MessageType.TURN_CHANGED,
+            firstPlayer
+        ));
+        
+        // Broadcast initial game state so all players see dealt cards
+        broadcastGameState();
     }
     
     /**
@@ -247,6 +270,21 @@ public class DesignatedHost {
         for (ClientPeer client : connectedClients) {
             client.receiveGameUpdate(message);
         }
+    }
+    
+    /**
+     * Broadcast current game state (hands, balances, dealer hand) to all clients
+     */
+    private void broadcastGameState() {
+        Map<String, Object> state = new HashMap<>();
+        state.put("playerHands", gameEngine.getCurrentHands());
+        state.put("playerBalances", gameEngine.getPlayerBalances());
+        state.put("dealerHand", gameEngine.getDealerHand());
+        
+        broadcast(new GameUpdateMessage(
+            GameUpdateMessage.MessageType.GAME_STATE_UPDATE,
+            state
+        ));
     }
     
     /**
