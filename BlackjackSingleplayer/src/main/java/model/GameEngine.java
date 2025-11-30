@@ -18,7 +18,6 @@ public class GameEngine {
     private final Set<String> bustedPlayers;
     
     private boolean roundInProgress;
-    private boolean bettingPhase;
     
     public GameEngine() {
         this.deck = new Deck();
@@ -29,7 +28,6 @@ public class GameEngine {
         this.standingPlayers = new HashSet<>();
         this.bustedPlayers = new HashSet<>();
         this.roundInProgress = false;
-        this.bettingPhase = false;
     }
     
     /**
