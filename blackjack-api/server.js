@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 // In-memory storage
-const games = new Map(); // gameCode -> { sessionId, hostId, address, port, playerCount, createdAt }
+const games = new Map(); // gameCode -> { sessionId, hostId, hostDisplayName, address, port, playerCount, createdAt }
 const MAX_PLAYERS = 4;
 
 // Generate 6-character game code
@@ -27,7 +27,7 @@ function generateGameCode() {
 
 // Register a new game (host registers their P2P connection info)
 app.post('/api/games/register', (req, res) => {
-    const { gameCode, hostId, address, port } = req.body;
+    const { gameCode, hostId, hostDisplayName, address, port } = req.body;
     
     if (!gameCode || !hostId || !address || !port) {
         return res.status(400).json({ 
@@ -36,17 +36,19 @@ app.post('/api/games/register', (req, res) => {
     }
     
     const sessionId = `game_${Date.now()}`;
+    const displayName = hostDisplayName || hostId; // Fallback to hostId if no display name
     
     games.set(gameCode.toUpperCase(), {
         sessionId,
         hostId,
+        hostDisplayName: displayName,
         address,
         port,
         playerCount: 1, // Host counts as first player
         createdAt: Date.now()
     });
     
-    console.log(`[API] Game registered: ${gameCode} by ${hostId} at ${address}:${port} (1/${MAX_PLAYERS} players)`);
+    console.log(`[API] Game registered: ${gameCode} by ${displayName} (${hostId}) at ${address}:${port} (1/${MAX_PLAYERS} players)`);
     
     res.json({
         success: true,
@@ -66,6 +68,7 @@ app.get('/api/games/list', (req, res) => {
                 gameCode,
                 sessionId: game.sessionId,
                 hostId: game.hostId,
+                hostDisplayName: game.hostDisplayName,
                 address: game.address,
                 port: game.port,
                 playerCount: game.playerCount,
@@ -99,6 +102,7 @@ app.get('/api/games/:gameCode', (req, res) => {
             gameCode: gameCode.toUpperCase(),
             sessionId: game.sessionId,
             hostId: game.hostId,
+            hostDisplayName: game.hostDisplayName,
             address: game.address,
             port: game.port,
             playerCount: game.playerCount,

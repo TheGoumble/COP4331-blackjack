@@ -203,10 +203,13 @@ public class GameLobbyView extends BorderPane {
     }
     
     private String extractConnectionString(String listItem) {
-        // Extract from format: "Game: game_123... - Host: player_123 - Address: 192.168.1.100:54321"
-        if (listItem.contains("Address: ")) {
-            int start = listItem.indexOf("Address: ") + 9;
-            return listItem.substring(start).trim();
+        // Extract game code from format: "Name's Blackjack Game (Code: ABC123)"
+        if (listItem.contains("(Code: ") && listItem.contains(")")) {
+            int start = listItem.indexOf("(Code: ") + 7;
+            int end = listItem.indexOf(")", start);
+            if (end > start) {
+                return listItem.substring(start, end).trim();
+            }
         }
         return null;
     }

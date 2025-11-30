@@ -51,7 +51,7 @@ public class CreateGameObserver implements MenuObserver {
         int hostPort = host.getPort();
         
         ApiClient.RegisterResponse response = apiClient.registerGame(
-            gameCode, userId, hostAddress, hostPort);
+            gameCode, userId, displayName, hostAddress, hostPort);
         
         if (!response.success) {
             System.err.println("Failed to register game with API: " + response.error);

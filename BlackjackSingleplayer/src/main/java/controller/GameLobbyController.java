@@ -47,11 +47,10 @@ public class GameLobbyController {
         Map<String, String> displayGames = new LinkedHashMap<>();
         
         for (GameInfo game : games) {
-            String display = String.format("Code: %s - Host: %s - Address: %s:%d",
-                game.gameCode,
-                game.hostId,
-                game.address,
-                game.port
+            // Use actual display name from API
+            String display = String.format("%s's Blackjack Game (Code: %s)",
+                game.hostDisplayName,
+                game.gameCode
             );
             displayGames.put(game.gameCode, display);
         }

@@ -37,11 +37,12 @@ public class ApiClient {
     /**
      * Register a game with the matchmaking server
      */
-    public RegisterResponse registerGame(String gameCode, String hostId, String address, int port) {
+    public RegisterResponse registerGame(String gameCode, String hostId, String hostDisplayName, String address, int port) {
         try {
             JsonObject payload = new JsonObject();
             payload.addProperty("gameCode", gameCode);
             payload.addProperty("hostId", hostId);
+            payload.addProperty("hostDisplayName", hostDisplayName);
             payload.addProperty("address", address);
             payload.addProperty("port", port);
             
@@ -100,6 +101,7 @@ public class ApiClient {
                         game.get("gameCode").getAsString(),
                         game.get("sessionId").getAsString(),
                         game.get("hostId").getAsString(),
+                        game.has("hostDisplayName") ? game.get("hostDisplayName").getAsString() : game.get("hostId").getAsString(),
                         game.get("address").getAsString(),
                         game.get("port").getAsInt(),
                         game.get("createdAt").getAsLong()
@@ -140,6 +142,7 @@ public class ApiClient {
                     game.get("gameCode").getAsString(),
                     game.get("sessionId").getAsString(),
                     game.get("hostId").getAsString(),
+                    game.has("hostDisplayName") ? game.get("hostDisplayName").getAsString() : game.get("hostId").getAsString(),
                     game.get("address").getAsString(),
                     game.get("port").getAsInt(),
                     0 // createdAt not included in single game response
@@ -268,15 +271,17 @@ public class ApiClient {
         public final String gameCode;
         public final String sessionId;
         public final String hostId;
+        public final String hostDisplayName;
         public final String address;
         public final int port;
         public final long createdAt;
         
-        public GameInfo(String gameCode, String sessionId, String hostId, 
+        public GameInfo(String gameCode, String sessionId, String hostId, String hostDisplayName,
                        String address, int port, long createdAt) {
             this.gameCode = gameCode;
             this.sessionId = sessionId;
             this.hostId = hostId;
+            this.hostDisplayName = hostDisplayName;
             this.address = address;
             this.port = port;
             this.createdAt = createdAt;
