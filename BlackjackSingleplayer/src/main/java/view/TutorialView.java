@@ -403,7 +403,7 @@ public class TutorialView extends BorderPane {
     }
 
     private VBox createDealerRulesSlide() {
-        Label title = new Label("🤵 Dealer Rules");
+        Label title = new Label("Dealer Rules");
         title.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
         
         Label body = new Label(

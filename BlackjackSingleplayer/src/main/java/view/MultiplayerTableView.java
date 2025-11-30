@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 /**
  * Multiplayer table view showing all players and dealer
  * 
- * @author Javier Vargas, Group 12
+ * @author Javier Vargas, Luca Lombardo Group 12
  */
 public class MultiplayerTableView extends BorderPane {
 
@@ -25,7 +25,7 @@ public class MultiplayerTableView extends BorderPane {
     private final TextArea dealerCardsArea = new TextArea();
     private final Label dealerTotalLabel = new Label("Total: 0");
 
-    private final VBox playersBox = new VBox(10);
+    private final FlowPane playersBox = new FlowPane(15, 15);
     private final Map<String, PlayerPanel> playerPanels = new HashMap<>();
 
     private final TextField betField = new TextField();
@@ -56,10 +56,14 @@ public class MultiplayerTableView extends BorderPane {
         VBox dealerBox = createDealerArea();
         setTop(dealerBox);
 
-        // Players area in center
+        // Players area in center - grid layout
+        playersBox.setAlignment(Pos.CENTER);
+        playersBox.setPadding(new Insets(20));
+        playersBox.setStyle("-fx-background-color: transparent;");
+        
         ScrollPane playersScroll = new ScrollPane(playersBox);
         playersScroll.setFitToWidth(true);
-        playersScroll.setStyle("-fx-background: transparent;");
+        playersScroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
         setCenter(playersScroll);
 
         // Controls at bottom
@@ -78,45 +82,109 @@ public class MultiplayerTableView extends BorderPane {
     }
 
     private VBox createDealerArea() {
-        dealerLabel.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        dealerLabel.setTextFill(Color.WHITE);
+        dealerLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
 
         dealerCardsArea.setEditable(false);
         dealerCardsArea.setPrefHeight(60);
-        dealerCardsArea.setStyle("-fx-control-inner-background: #1a3d0a;");
+        dealerCardsArea.setStyle(
+            "-fx-control-inner-background: white; " +
+            "-fx-background-color: white; " +
+            "-fx-border-color: #cccccc; " +
+            "-fx-border-width: 2px; " +
+            "-fx-border-radius: 8px; " +
+            "-fx-background-radius: 8px; " +
+            "-fx-font-family: 'Arial'; " +
+            "-fx-font-size: 14px;"
+        );
 
-        dealerTotalLabel.setTextFill(Color.WHITE);
+        dealerTotalLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
 
-        VBox box = new VBox(5, dealerLabel, dealerCardsArea, dealerTotalLabel);
+        VBox box = new VBox(10, dealerLabel, dealerCardsArea, dealerTotalLabel);
         box.setAlignment(Pos.CENTER);
-        box.setPadding(new Insets(10));
-        box.setStyle("-fx-background-color: #1a3d0a; -fx-background-radius: 10;");
-        return box;
+        box.setPadding(new Insets(20));
+        box.setStyle(
+            "-fx-background-color: white; " +
+            "-fx-background-radius: 15; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 8, 0, 0, 3);"
+        );
+        box.setMaxWidth(600);
+        VBox wrapper = new VBox(box);
+        wrapper.setAlignment(Pos.CENTER);
+        wrapper.setPadding(new Insets(15));
+        return wrapper;
     }
 
     private VBox createControlsArea() {
         betField.setPromptText("Bet amount");
-        betField.setPrefWidth(100);
+        betField.setPrefWidth(120);
+        betField.setStyle(
+            "-fx-background-color: white; " +
+            "-fx-border-color: #cccccc; " +
+            "-fx-border-width: 2px; " +
+            "-fx-border-radius: 8px; " +
+            "-fx-background-radius: 8px; " +
+            "-fx-padding: 8; " +
+            "-fx-font-size: 14px; " +
+            "-fx-font-family: 'Arial';"
+        );
+
+        // Style all buttons
+        styleButton(betButton, "#2d5016");
+        styleButton(hitButton, "#2d5016");
+        styleButton(standButton, "#2d5016");
+        styleButton(startRoundButton, "#2d5016");
+        styleButton(backToMenuButton, "#8B0000");
 
         HBox actionButtons = new HBox(10, betField, betButton, hitButton, standButton, startRoundButton, backToMenuButton);
         actionButtons.setAlignment(Pos.CENTER);
 
-        statusLabel.setTextFill(Color.WHITE);
-        statusLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        statusLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: 'Arial';");
 
-        turnIndicatorLabel.setTextFill(Color.LIME);
-        turnIndicatorLabel.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        turnIndicatorLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #FFD700; -fx-font-family: 'Arial';");
 
-        gameCodeLabel.setTextFill(Color.LIGHTBLUE);
-        gameCodeLabel.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+        gameCodeLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: 'Arial';");
 
-        myBalanceLabel.setTextFill(Color.YELLOW);
-        myBalanceLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        myBalanceLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #FFD700; -fx-font-family: 'Arial';");
 
         VBox box = new VBox(10, actionButtons, gameCodeLabel, turnIndicatorLabel, statusLabel, myBalanceLabel);
         box.setAlignment(Pos.CENTER);
-        box.setPadding(new Insets(10));
+        box.setPadding(new Insets(15));
         return box;
+    }
+
+    private void styleButton(Button button, String color) {
+        button.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: " + color + "; " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 8 20 8 20; " +
+            "-fx-background-radius: 8; " +
+            "-fx-cursor: hand; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+        );
+        
+        button.setOnMouseEntered(e -> button.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: derive(" + color + ", 20%); " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 8 20 8 20; " +
+            "-fx-background-radius: 8; " +
+            "-fx-cursor: hand; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 8, 0, 3, 3);"
+        ));
+        
+        button.setOnMouseExited(e -> button.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: " + color + "; " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 8 20 8 20; " +
+            "-fx-background-radius: 8; " +
+            "-fx-cursor: hand; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+        ));
     }
 
     private void handleBetClick() {
@@ -261,33 +329,59 @@ public class MultiplayerTableView extends BorderPane {
      */
     private static class PlayerPanel extends VBox {
         private final Label nameLabel;
-        private final TextArea cardsArea;
+        private final Label cardsLabel;
         private final Label balanceLabel;
         private final Label totalLabel;
 
         public PlayerPanel(String playerId, String displayName) {
-            super(5);
+            super(6);
 
             nameLabel = new Label(displayName);
-            nameLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-            nameLabel.setTextFill(Color.WHITE);
+            nameLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
+            nameLabel.setWrapText(true);
+            nameLabel.setMaxWidth(160);
+            nameLabel.setAlignment(Pos.CENTER);
 
-            cardsArea = new TextArea();
-            cardsArea.setEditable(false);
-            cardsArea.setPrefHeight(50);
-            cardsArea.setStyle("-fx-control-inner-background: #3d5d2a;");
+            cardsLabel = new Label("No cards");
+            cardsLabel.setWrapText(true);
+            cardsLabel.setMaxWidth(160);
+            cardsLabel.setMinHeight(55);
+            cardsLabel.setMaxHeight(55);
+            cardsLabel.setAlignment(Pos.CENTER);
+            cardsLabel.setStyle(
+                "-fx-background-color: #f9f9f9; " +
+                "-fx-border-color: #cccccc; " +
+                "-fx-border-width: 1px; " +
+                "-fx-border-radius: 6px; " +
+                "-fx-background-radius: 6px; " +
+                "-fx-font-family: 'Arial'; " +
+                "-fx-font-size: 11px; " +
+                "-fx-padding: 5;"
+            );
 
             totalLabel = new Label("Total: 0");
-            totalLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
-            totalLabel.setTextFill(Color.LIGHTGREEN);
+            totalLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
+            totalLabel.setAlignment(Pos.CENTER);
 
-            balanceLabel = new Label("Balance: $0");
-            balanceLabel.setTextFill(Color.WHITE);
+            balanceLabel = new Label("$0");
+            balanceLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #555555; -fx-font-family: 'Arial';");
+            balanceLabel.setAlignment(Pos.CENTER);
 
-            getChildren().addAll(nameLabel, cardsArea, totalLabel, balanceLabel);
-            setAlignment(Pos.CENTER_LEFT);
-            setPadding(new Insets(10));
-            setStyle("-fx-background-color: #3d5d2a; -fx-background-radius: 5; -fx-border-color: #ffffff; -fx-border-radius: 5;");
+            getChildren().addAll(nameLabel, cardsLabel, totalLabel, balanceLabel);
+            setAlignment(Pos.CENTER);
+            setPadding(new Insets(12));
+            setStyle(
+                "-fx-background-color: white; " +
+                "-fx-background-radius: 10; " +
+                "-fx-border-color: #dddddd; " +
+                "-fx-border-width: 2px; " +
+                "-fx-border-radius: 10; " +
+                "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 2, 2);"
+            );
+            setMinWidth(180);
+            setMaxWidth(180);
+            setMinHeight(160);
+            setMaxHeight(160);
         }
 
         public void update(List<Card> cards, int balance, boolean isActive) {
@@ -299,19 +393,40 @@ public class MultiplayerTableView extends BorderPane {
                 if (i < cards.size() - 1) sb.append(", ");
                 total += card.baseValue();
             }
-            cardsArea.setText(sb.toString());
+            
+            if (cards.isEmpty()) {
+                cardsLabel.setText("No cards");
+            } else {
+                cardsLabel.setText(sb.toString());
+            }
+            
             totalLabel.setText("Total: " + total);
-            balanceLabel.setText("Balance: $" + balance);
+            balanceLabel.setText("$" + balance);
 
             if (isActive) {
-                setStyle("-fx-background-color: #4d6d3a; -fx-background-radius: 5; -fx-border-color: yellow; -fx-border-width: 3; -fx-border-radius: 5;");
-                nameLabel.setText(nameLabel.getText().split(" ")[0] + " [YOUR TURN]");
-                nameLabel.setTextFill(Color.YELLOW);
+                setStyle(
+                    "-fx-background-color: white; " +
+                    "-fx-background-radius: 10; " +
+                    "-fx-border-color: #FFD700; " +
+                    "-fx-border-width: 3px; " +
+                    "-fx-border-radius: 10; " +
+                    "-fx-effect: dropshadow(three-pass-box, rgba(255,215,0,0.5), 10, 0, 0, 0);"
+                );
+                String baseName = nameLabel.getText().split(" \\[")[0];
+                nameLabel.setText(baseName + " [TURN]");
+                nameLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #FFD700; -fx-font-family: 'Arial';");
             } else {
-                setStyle("-fx-background-color: #3d5d2a; -fx-background-radius: 5; -fx-border-color: #ffffff; -fx-border-radius: 5;");
-                String baseName = nameLabel.getText().split(" ")[0];
+                setStyle(
+                    "-fx-background-color: white; " +
+                    "-fx-background-radius: 10; " +
+                    "-fx-border-color: #dddddd; " +
+                    "-fx-border-width: 2px; " +
+                    "-fx-border-radius: 10; " +
+                    "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 2, 2);"
+                );
+                String baseName = nameLabel.getText().split(" \\[")[0];
                 nameLabel.setText(baseName);
-                nameLabel.setTextFill(Color.WHITE);
+                nameLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
             }
         }
     }
