@@ -1,37 +1,36 @@
 # Blackjack — COP4331 Project
 
-This project is a JavaFX-based Blackjack game built for **COP4331**. It demonstrates:
-- **JavaFX GUI** with interactive game interface
-- **MVC Architecture** (Model-View-Controller)
-- **Object-Oriented Design** with proper encapsulation
-- **Game logic** for classic Blackjack rules
-
-The application features a complete single-player Blackjack experience with betting, hit/stand actions, and dealer AI.
-
----
+A **JavaFX-based multiplayer Blackjack game** with online matchmaking built for **COP4331**. Play against dealer AI solo, or create games and challenge friends anywhere via the internet.
 
 ## Features
 
 ### Game Modes
 - **Single-player Blackjack** against dealer AI
+- **Multiplayer (Online)** — Create or join games with 1-4 players globally
 - **Tutorial Mode** to learn the rules
-- **Balance tracking** across game sessions
-- **Betting system** with configurable bet amounts
+- **Balance tracking** with betting system
+
+### Multiplayer Highlights
+- **Online Matchmaking API** — Discover games globally without port forwarding
+- **6-Character Game Codes** — Easy sharing for internet play
+- **P2P Gameplay** — Direct connections for low-latency game sessions
+- **Auto-Discovery** — Games appear automatically in lobby
+- **Real-time Sync** — All players see game state updates instantly
 
 ### Gameplay Features
 - Classic Blackjack rules (dealer hits on 16 or less, stands on 17+)
-- Real-time card dealing animations
-- Hit and Stand player actions
+- Real-time card dealing
+- Hit and Stand actions
 - Automatic win/loss/push detection
 - Balance management with betting
-- Game result notifications (Win, Lose, Bust, Blackjack, Push)
+- Multi-player synchronization
 
 ### Technical Features
-- JavaFX-based GUI using FXML
-- Model-View-Controller architecture
-- Deck management with card shuffling
-- Hand evaluation logic
-- Scene routing between menus and game table
+- **Hybrid Architecture**: API for matchmaking + P2P for gameplay
+- **Cloud Deployment**: Google Cloud Run hosted API
+- **MVC Architecture** with JavaFX GUI
+- **Command Pattern** for networked game actions
+- **Observer Pattern** for real-time updates
 
 ---
 
@@ -41,46 +40,58 @@ The application features a complete single-player Blackjack experience with bett
 COP4331-blackjack/
 │
 ├── readme.md
+├── INTERNET_PLAY_GUIDE.md
+├── secrets.properties.example       # API URL template (copy to secrets.properties)
+│
+├── blackjack-api/                   # Node.js matchmaking API
+│   ├── server.js                    # Express server
+│   ├── package.json
+│   ├── Dockerfile                   # Cloud deployment
+│   └── DEPLOYMENT.md                # Google Cloud Run guide
+│
 └── BlackjackSingleplayer/
-    ├── pom.xml                     # Maven configuration
-    ├── nbactions.xml
-    └── src/
-        ├── main/
-        │   └── java/
-        │       ├── app/
-        │       │   ├── MainApp.java             # Application entry point
-        │       │   └── SceneRouter.java         # Navigation controller
-        │       ├── controller/
-        │       │   ├── DealerTableController.java   # Game logic controller
-        │       │   ├── MenuController.java          # Menu navigation
-        │       │   └── TutorialController.java      # Tutorial display
-        │       ├── model/
-        │       │   ├── ActiveGame.java          # Current game state
-        │       │   ├── Balance.java             # Player balance
-        │       │   ├── BetAmount.java           # Bet management
-        │       │   ├── Card.java                # Card representation
-        │       │   ├── CardInPlay.java          # Card display state
-        │       │   ├── CardTotal.java           # Hand value calculator
-        │       │   ├── Deck.java                # Deck management
-        │       │   ├── GameResult.java          # Win/loss determination
-        │       │   ├── Hand.java                # Player/dealer hands
-        │       │   ├── Rank.java                # Card ranks enum
-        │       │   └── Suit.java                # Card suits enum
-        │       └── view/
-        │           ├── DealerTableView.java     # Game table UI
-        │           ├── MenuPageView.java        # Main menu UI
-        │           └── TutorialView.java        # Tutorial UI
-        └── test/
-            └── java/                            # Unit tests
+    ├── pom.xml                      # Maven configuration
+    └── src/main/java/
+        ├── app/
+        │   ├── MainApp.java         # Application entry point
+        │   └── SceneRouter.java     # Navigation + cleanup
+        ├── controller/
+        │   ├── DealerTableController.java
+        │   ├── MenuController.java
+        │   ├── GameLobbyController.java       # Multiplayer lobby
+        │   ├── MultiplayerTableController.java
+        │   └── TutorialController.java
+        ├── model/
+        │   ├── GameEngine.java      # Multiplayer game state
+        │   ├── Card.java, Deck.java, Hand.java
+        │   └── [other game models]
+        ├── network/
+        │   ├── ApiClient.java       # HTTP matchmaking client
+        │   ├── ApiConfig.java       # API configuration
+        │   ├── DesignatedHost.java  # P2P game host
+        │   ├── BlackjackPeer.java   # P2P client
+        │   └── GameUpdateMessage.java
+        ├── command/
+        │   ├── Command.java         # Command pattern interface
+        │   ├── HitCommand.java
+        │   ├── StandCommand.java
+        │   └── SetBetCommand.java
+        ├── observer/
+        │   ├── CreateGameObserver.java
+        │   └── JoinGameObserver.java
+        └── view/
+            ├── DealerTableView.java
+            ├── GameLobbyView.java   # Multiplayer browser
+            ├── MultiplayerTableView.java
+            └── [other views]
 ```
 
 ---
 
 ## Requirements
-You must have:
-- **Java JDK 24+** (Project uses Java 24)
+- **Java JDK 24+**
 - **Apache Maven 3.9+**
-- **JavaFX 24.0.2** (included via Maven)
+- **JavaFX 24.0.2** (auto-downloaded via Maven)
 - **Git**
 
 Verify Java:
@@ -90,172 +101,110 @@ java -version
 
 ---
 
-## Installing Maven Manually (Windows)
-1. Download the ZIP (working link):  
-   https://archive.apache.org/dist/maven/maven-3/3.9.7/binaries/apache-maven-3.9.7-bin.zip
+## Quick Start
 
-2. Extract to:
-```
-C:\Program Files\apache-maven-3.9.7
-```
-
-3. Add to PATH:
-```
-C:\Program Files\apache-maven-3.9.7\bin
-```
-
-4. Restart PowerShell and verify:
-```powershell
-mvn -v
-```
-
----
-
-## Cloning the Repository
+### 1. Clone the Repository
 ```powershell
 git clone https://github.com/TheGoumble/COP4331-blackjack.git
 cd COP4331-blackjack
 ```
 
----
-
-## Building and Running the Game
-
-### Quick Start
-
-Navigate to the project directory:
+### 2. Setup Secrets File
 ```powershell
 cd BlackjackSingleplayer
+Copy-Item secrets.properties.example secrets.properties
 ```
 
-**Run the game:**
+The `secrets.properties` file contains the API URL. **Do not commit this file.**
+
+### 3. Run the Game
 ```powershell
 mvn clean javafx:run
 ```
 
-The game window will launch automatically with the main menu.
+The game launches with the main menu.
 
 ---
 
 ## Using the Application
 
 ### Main Menu
-When you launch the application, you'll see the main menu with options:
-- **Create Blackjack Game** — Start a new game session
-- **Join Game** — (Reserved for future multiplayer functionality)
-- **Tutorial** — Learn how to play Blackjack
-- **Close Application** — Exit the game
+- **Create Blackjack Game** — Start single-player or host multiplayer
+- **Join Game** — Browse/join multiplayer games
+- **Tutorial** — Learn Blackjack rules
+- **Close Application** — Exit
 
-### Starting a Game
-1. Click **Create Blackjack Game**
-2. The dealer table will appear with:
-   - Your current balance (starts at $1000)
-   - Betting input field
-   - Dealer's hand (top)
-   - Your hand (bottom)
-   - Action buttons (Hit/Stand)
+### Single-Player Mode
+1. Click **Create Blackjack Game** → **Single-Player**
+2. Place bets, hit/stand, play against dealer AI
+3. Balance starts at $10,000
 
-### Gameplay Flow
-1. **Place Bet**: Enter amount and click **Bet**
-2. **Initial Deal**: You receive 2 cards, dealer receives 2 cards (1 face down)
-3. **Your Turn**:
-   - **Hit** — Draw another card
-   - **Stand** — End your turn
-4. **Dealer's Turn**: Dealer reveals hidden card and plays (hits on 16 or less)
-5. **Result**: Win, lose, push, bust, or blackjack is determined
-6. **Continue**: Place another bet to play again
+### Multiplayer Mode
 
-### Tutorial Mode
-Click **Tutorial** from the main menu to view:
-- Game rules
-- Card values
-- Win conditions
-- Betting instructions
+#### Creating a Game (Host)
+1. Click **Create Blackjack Game** → **Multiplayer**
+2. A **6-character game code** appears (e.g., `ABC123`)
+3. Share this code with friends anywhere in the world
+4. Wait for players to join (1-4 players max)
+5. Click **Start Round** when ready
 
-Click **Exit Tutorial** to return to the main menu.
+#### Joining a Game (Client)
+1. Click **Join Game**
+2. Games appear automatically in the list
+3. **Option A**: Click a game → **Join Selected Game**
+4. **Option B**: Enter 6-character code → **Direct Connect**
+5. Wait for host to start the round
 
----
-
-## Project Configuration
-
-### Maven Configuration
-The `pom.xml` is already configured with:
-```xml
-<properties>
-    <maven.compiler.source>24</maven.compiler.source>
-    <maven.compiler.target>24</maven.compiler.target>
-    <exec.mainClass>app.MainApp</exec.mainClass>
-    <javafx.version>24.0.2</javafx.version>
-</properties>
-```
-
-### JavaFX Dependencies
-JavaFX modules are automatically downloaded via Maven:
-- `javafx-controls` — UI components
-- `javafx-fxml` — FXML support
+### Gameplay (Multiplayer)
+1. Host clicks **Start Round**
+2. All players place bets and play simultaneously
+3. Hit/Stand actions sync across all clients
+4. Dealer plays when all players finish
+5. Results shown for everyone
+6. Host starts next round
 
 ---
 
-## Architecture Overview
+## Architecture
 
-### MVC Pattern
-- **Model**: Game state, card logic, deck management (`model/`)
-- **View**: JavaFX UI components (`view/`)
-- **Controller**: Event handlers and game logic flow (`controller/`)
+### Hybrid Multiplayer Design
+- **API (Express.js)**: Matchmaking registry only
+  - Game registration/discovery
+  - Player count tracking
+  - Auto-cleanup on disconnect
+  
+- **P2P (Java TCP)**: Actual gameplay
+  - Direct socket connections
+  - Low-latency game state sync
+  - Command validation by host
 
-### Key Components
-
-#### Application Layer (`app/`)
-- `MainApp.java` — JavaFX application entry point
-- `SceneRouter.java` — Manages navigation between scenes
-
-#### Controllers (`controller/`)
-- `DealerTableController.java` — Handles game logic, betting, hit/stand actions
-- `MenuController.java` — Main menu navigation
-- `TutorialController.java` — Tutorial display logic
-
-#### Models (`model/`)
-- `ActiveGame.java` — Current game session state
-- `Balance.java` — Tracks player's money
-- `BetAmount.java` — Current bet validation and management
-- `Card.java` — Individual card (rank + suit)
-- `Deck.java` — 52-card deck with shuffle
-- `Hand.java` — Collection of cards for player/dealer
-- `CardTotal.java` — Calculates hand value (Ace = 1 or 11)
-- `GameResult.java` — Determines winner (WIN, LOSE, PUSH, BUST, BLACKJACK)
-- `Rank.java` — Card ranks (ACE through KING)
-- `Suit.java` — Card suits (HEARTS, DIAMONDS, CLUBS, SPADES)
-
-#### Views (`view/`)
-- `MenuPageView.java` — Main menu UI
-- `DealerTableView.java` — Game table with cards, buttons, balance display
-- `TutorialView.java` — Tutorial information display
+### Key Patterns
+- **MVC**: Model-View-Controller separation
+- **Command Pattern**: Networked player actions
+- **Observer Pattern**: Real-time UI updates
+- **Singleton**: API client, configuration
 
 ---
 
-## Troubleshooting
+## Multiplayer Technical Details
 
-### `mvn` not recognized
-Add Maven to PATH and restart PowerShell.
+## Multiplayer Technical Details
 
-### JavaFX runtime components are missing
-Maven should automatically download JavaFX. If you encounter errors:
-```powershell
-mvn clean install
-mvn javafx:run
-```
+### Network Flow
+1. **Host creates game** → Registers with API (returns 6-char code)
+2. **API lists games** → Clients see available games in lobby
+3. **Client joins** → API provides host IP:port
+4. **P2P connection** → Client connects directly to host via TCP
+5. **Gameplay** → All commands validated by host, synced to clients
+6. **Cleanup** → Window close unregisters game from API
 
-### Application won't launch
-Ensure you're in the `BlackjackSingleplayer` directory:
-```powershell
-cd BlackjackSingleplayer
-mvn clean javafx:run
-```
-
-### Java version mismatch
-This project uses Java 24. If you have a different version:
-1. Install JDK 24 or modify `pom.xml` to match your Java version
-2. Update `<maven.compiler.source>` and `<maven.compiler.target>` properties
+### Components
+- **ApiClient.java**: HTTP client for matchmaking API
+- **ApiConfig.java**: Environment configuration loader
+- **DesignatedHost.java**: Authoritative P2P game server
+- **BlackjackPeer.java**: P2P client with local state cache
+- **GameEngine.java**: Server-side game logic
+- **Command Pattern**: HitCommand, StandCommand, SetBetCommand
 
 ---
 
@@ -278,21 +227,56 @@ This project uses Java 24. If you have a different version:
 
 ---
 
-## Future Enhancements
-- Multiplayer support (Join Game functionality)
-- Double down and split actions
-- Insurance bet option
-- Statistics tracking (games played, win rate)
-- Save/load game state
-- Customizable betting limits
-- Sound effects and animations
+## Troubleshooting
+
+### `mvn` not recognized
+Add Maven to PATH and restart PowerShell. See installation guide above.
+
+### JavaFX runtime components are missing
+```powershell
+mvn clean install
+mvn javafx:run
+```
+
+### Application won't launch
+Ensure you're in the correct directory:
+```powershell
+cd BlackjackSingleplayer
+mvn clean javafx:run
+```
+
+### Connection issues in multiplayer
+- Verify `secrets.properties` exists with API URL
+- See `INTERNET_PLAY_GUIDE.md` for detailed troubleshooting
+
+### "No games found"
+- Click **Refresh** in the lobby
+- Ensure host has created a game
+
+---
+
+## Development
+
+### Building
+```powershell
+cd BlackjackSingleplayer
+mvn clean compile
+```
+
+### Testing
+```powershell
+mvn test
+```
+
+### Deploying API
+See `blackjack-api/DEPLOYMENT.md` for Google Cloud Run deployment guide.
 
 ---
 
 ## Credits
-**Authors**: Luca Lombardo, Olivia Strandberg, Javier Vargas, Bridjet Walker 
+**Authors**: Luca Lombardo, Olivia Strandberg, Javier Vargas, Bridjet Walker  
 **Course**: COP4331 — Processes of Object-Oriented Programming  
-**Technology**: JavaFX 24.0.2, Java 24, Maven
+**Technology**: JavaFX 24.0.2, Java 24, Maven, Node.js, Express, Google Cloud Run
 
 ---
 

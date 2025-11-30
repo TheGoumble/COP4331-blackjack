@@ -15,9 +15,10 @@ public class GameEngine {
     private final Map<String, Integer> currentBets;
     private final List<Card> dealerHand;
     private final Set<String> standingPlayers;
+    private final Set<String> bustedPlayers;
     
-    private String currentPlayerId;
     private boolean roundInProgress;
+    private boolean bettingPhase;
     
     public GameEngine() {
         this.deck = new Deck();
@@ -26,7 +27,9 @@ public class GameEngine {
         this.currentBets = new HashMap<>();
         this.dealerHand = new ArrayList<>();
         this.standingPlayers = new HashSet<>();
+        this.bustedPlayers = new HashSet<>();
         this.roundInProgress = false;
+        this.bettingPhase = false;
     }
     
     /**
@@ -49,9 +52,13 @@ public class GameEngine {
     }
     
     /**
-     * Process a bet from a player
+     * Process a bet from a player (only before round starts)
      */
     public void processBet(String playerId, int amount) {
+        if (roundInProgress) {
+            throw new IllegalStateException("Cannot bet during active round");
+        }
+        
         if (!playerBalances.containsKey(playerId)) {
             throw new IllegalArgumentException("Player not found: " + playerId);
         }
@@ -84,6 +91,7 @@ public class GameEngine {
         }
         dealerHand.clear();
         standingPlayers.clear();
+        bustedPlayers.clear();
         
         // Shuffle deck
         deck.shuffle();
@@ -100,6 +108,21 @@ public class GameEngine {
         dealerHand.add(deck.deal());
         
         roundInProgress = true;
+        
+        // Check for dealer blackjack (instant win for dealer)
+        if (dealerHand.size() == 2 && calculateHandValue(dealerHand) == 21) {
+            // Dealer has blackjack - all players with non-blackjack lose immediately
+            for (String playerId : currentHands.keySet()) {
+                List<Card> hand = currentHands.get(playerId);
+                if (hand.size() == 2 && calculateHandValue(hand) == 21) {
+                    // Player also has blackjack - push
+                    standingPlayers.add(playerId);
+                } else {
+                    // Player loses to dealer blackjack
+                    standingPlayers.add(playerId);
+                }
+            }
+        }
     }
     
     /**
@@ -118,12 +141,17 @@ public class GameEngine {
             throw new IllegalStateException("Player has already stood");
         }
         
+        if (bustedPlayers.contains(playerId)) {
+            throw new IllegalStateException("Player has busted");
+        }
+        
         List<Card> hand = currentHands.get(playerId);
         hand.add(deck.deal());
         
         // Check for bust
         if (calculateHandValue(hand) > 21) {
             standingPlayers.add(playerId);
+            bustedPlayers.add(playerId);
         }
     }
     
@@ -200,10 +228,15 @@ public class GameEngine {
             if (playerValue > 21) {
                 result = GameResult.DEALER_WIN; // Player bust
                 // Bet already deducted
-            } else if (hand.size() == 2 && playerValue == 21) {
-                // Check for blackjack first (pays 3:2)
+            } else if (hand.size() == 2 && playerValue == 21 && !(dealerHand.size() == 2 && dealerValue == 21)) {
+                // Blackjack (pays 3:2 = bet + 1.5x bet)
                 result = GameResult.PLAYER_BLACKJACK;
-                playerBalances.put(playerId, playerBalances.get(playerId) + bet + (bet * 3 / 2));
+                int payout = bet + bet + (bet / 2); // Return bet + 1.5x bet
+                playerBalances.put(playerId, playerBalances.get(playerId) + payout);
+            } else if (hand.size() == 2 && playerValue == 21 && dealerHand.size() == 2 && dealerValue == 21) {
+                // Both have blackjack - push
+                result = GameResult.PUSH;
+                playerBalances.put(playerId, playerBalances.get(playerId) + bet); // Return bet
             } else if (dealerBust) {
                 result = GameResult.PLAYER_WIN;
                 playerBalances.put(playerId, playerBalances.get(playerId) + bet * 2);
@@ -256,5 +289,13 @@ public class GameEngine {
     
     public Set<String> getPlayerIds() {
         return new HashSet<>(playerBalances.keySet());
+    }
+    
+    public boolean hasPlayerBusted(String playerId) {
+        return bustedPlayers.contains(playerId);
+    }
+    
+    public int getPlayerBet(String playerId) {
+        return currentBets.getOrDefault(playerId, 0);
     }
 }

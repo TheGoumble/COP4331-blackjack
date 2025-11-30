@@ -46,7 +46,11 @@ public class ClientPeer {
     public void connectToHost(String hostAddress, int port) {
         try {
             System.out.println("[CLIENT] Connecting to " + hostAddress + ":" + port);
-            socket = new Socket(hostAddress, port);
+            
+            // Create socket with connection timeout
+            socket = new Socket();
+            socket.connect(new InetSocketAddress(hostAddress, port), 10000); // 10 second timeout
+            socket.setSoTimeout(30000); // 30 second read timeout
             
             out = new ObjectOutputStream(socket.getOutputStream());
             out.flush();
@@ -64,10 +68,15 @@ public class ClientPeer {
             listenerThread.setDaemon(true);
             listenerThread.start();
             
+        } catch (SocketTimeoutException e) {
+            System.err.println("[CLIENT] Connection timeout - host may be unreachable or behind firewall");
+            connected = false;
+            throw new RuntimeException("Connection timeout - unable to reach host");
         } catch (IOException e) {
             System.err.println("[CLIENT] Failed to connect: " + e.getMessage());
             e.printStackTrace();
             connected = false;
+            throw new RuntimeException("Connection failed: " + e.getMessage());
         }
     }
     

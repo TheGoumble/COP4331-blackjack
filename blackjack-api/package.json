@@ -1,0 +1,21 @@
+{
+  "name": "blackjack-api",
+  "version": "1.0.0",
+  "description": "Multiplayer Blackjack Game API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": ["blackjack", "multiplayer", "game"],
+  "author": "COP4331 Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

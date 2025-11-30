@@ -102,17 +102,30 @@ public class SceneRouter {
     }
     
     public void joinGameByAddress(String userId, String hostAddress, int port) {
-        // Create peer for this player and connect via network
-        BlackjackPeer peer = new BlackjackPeer(userId);
-        peer.connectToHost(hostAddress, port);
-        
-        // Navigate to multiplayer table (no host reference for remote connections)
-        MultiplayerTableView tableView = new MultiplayerTableView();
-        new MultiplayerTableController(peer, null, tableView, this, "remote_" + hostAddress + ":" + port);
+        try {
+            // Create peer for this player and connect via network
+            BlackjackPeer peer = new BlackjackPeer(userId);
+            peer.connectToHost(hostAddress, port);
+            
+            // Navigate to multiplayer table (no host reference for remote connections)
+            MultiplayerTableView tableView = new MultiplayerTableView();
+            new MultiplayerTableController(peer, null, tableView, this, "remote_" + hostAddress + ":" + port);
 
-        Scene scene = new Scene(tableView, 1200, 700);
-        stage.setScene(scene);
-        stage.setTitle("Blackjack - Multiplayer Table");
+            Scene scene = new Scene(tableView, 1200, 700);
+            stage.setScene(scene);
+            stage.setTitle("Blackjack - Multiplayer Table");
+        } catch (Exception e) {
+            System.err.println("[ROUTER] Failed to join game: " + e.getMessage());
+            // Stay on lobby and show error
+            showGameLobby(userId);
+            javafx.application.Platform.runLater(() -> {
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                alert.setTitle("Connection Failed");
+                alert.setHeaderText("Unable to connect to game");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
+            });
+        }
     }
 
     public void showTutorial() {
