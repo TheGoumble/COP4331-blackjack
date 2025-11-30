@@ -9,7 +9,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -21,8 +20,10 @@ public class GameLobbyView extends BorderPane {
 
     private final Label titleLabel = new Label("Game Lobby");
     private final ListView<String> gamesListView = new ListView<>();
+    private final TextField directConnectField = new TextField();
     private final Button joinSelectedButton = new Button("Join Selected Game");
     private final Button refreshButton = new Button("Refresh List");
+    private final Button directConnectButton = new Button("Direct Connect");
     private final Button backButton = new Button("Back to Menu");
     private final Label statusLabel = new Label("Searching for games on local network...");
     
@@ -54,6 +55,7 @@ public class GameLobbyView extends BorderPane {
         // Wire up actions
         joinSelectedButton.setOnAction(e -> handleJoinSelected());
         refreshButton.setOnAction(e -> onRefresh.run());
+        directConnectButton.setOnAction(e -> handleDirectConnect());
         backButton.setOnAction(e -> onBack.run());
         
         // Double-click to join
@@ -87,20 +89,40 @@ public class GameLobbyView extends BorderPane {
     }
 
     private VBox createBottomSection() {
-        Label instructionLabel = new Label("Games broadcast automatically on UDP port 25566");
+        Label instructionLabel = new Label("Games are discovered via online matchmaking");
         instructionLabel.setFont(Font.font("Arial", 12));
         instructionLabel.setTextFill(Color.LIGHTGRAY);
 
         statusLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
         statusLabel.setTextFill(Color.YELLOW);
 
-        VBox box = new VBox(15, instructionLabel, statusLabel, backButton);
+        // Direct connect section for internet play
+        Label orLabel = new Label("- OR Enter Game Code / IP:Port -");
+        orLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        orLabel.setTextFill(Color.LIGHTGRAY);
+        
+        directConnectField.setPromptText("Game Code (e.g., ABC123) or IP:Port (e.g., 203.0.113.5:54321)");
+        directConnectField.setPrefWidth(450);
+        directConnectField.setStyle(
+            "-fx-background-color: #0f3460; " +
+            "-fx-text-fill: white; " +
+            "-fx-prompt-text-fill: gray; " +
+            "-fx-border-color: #e94560; " +
+            "-fx-border-width: 2; " +
+            "-fx-border-radius: 5;"
+        );
+        
+        HBox directConnectBox = new HBox(10, directConnectField, directConnectButton);
+        directConnectBox.setAlignment(Pos.CENTER);
+
+        VBox box = new VBox(15, instructionLabel, statusLabel, orLabel, directConnectBox, backButton);
         box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(20, 0, 0, 0));
 
         // Style buttons
         styleButton(joinSelectedButton, "#e94560");
         styleButton(refreshButton, "#0f3460");
+        styleButton(directConnectButton, "#e94560");
         styleButton(backButton, "#533483");
 
         return box;
@@ -121,7 +143,7 @@ public class GameLobbyView extends BorderPane {
 
     private void handleJoinSelected() {
         String selected = gamesListView.getSelectionModel().getSelectedItem();
-        if (selected != null && !selected.equals("No games found") && !selected.equals("Searching...")) {
+        if (selected != null && !selected.equals("No games found - refresh to check for new games") && !selected.equals("Searching...")) {
             // Extract connection string from display format
             String connectionString = extractConnectionString(selected);
             if (connectionString != null) {
@@ -129,6 +151,16 @@ public class GameLobbyView extends BorderPane {
             }
         } else {
             setStatus("Please select a game from the list");
+        }
+    }
+    
+    private void handleDirectConnect() {
+        String address = directConnectField.getText().trim().toUpperCase();
+        if (!address.isEmpty()) {
+            onJoinSession.accept(address);
+            directConnectField.clear();
+        } else {
+            setStatus("Please enter game code or host address");
         }
     }
     
@@ -148,7 +180,7 @@ public class GameLobbyView extends BorderPane {
         gamesListView.getItems().clear();
         
         if (games.isEmpty()) {
-            gamesListView.getItems().add("No games found - waiting for broadcasts...");
+            gamesListView.getItems().add("No games found - refresh to check for new games");
             setStatus("No games discovered yet. Make sure host has created a game.");
         } else {
             for (Map.Entry<String, String> entry : games.entrySet()) {

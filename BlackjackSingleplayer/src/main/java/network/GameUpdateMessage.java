@@ -17,6 +17,7 @@ public class GameUpdateMessage implements Serializable {
     public enum MessageType {
         PLAYER_JOINED,
         PLAYER_LEFT,
+        PLAYERS_LIST,
         BET_PLACED,
         ROUND_STARTED,
         CARD_DEALT,

@@ -21,6 +21,8 @@ public class DesignatedHost {
     private Thread acceptThread;
     private boolean running;
     private final int port;
+    private String gameCode;
+    private ApiClient apiClient;
     
     public DesignatedHost(String hostId) {
         this.hostId = hostId;
@@ -133,6 +135,24 @@ public class DesignatedHost {
         // Add player to game engine
         gameEngine.addPlayer(client.getUserId(), 10000);
         
+        // Send existing players list to the new client
+        List<String> existingPlayers = new ArrayList<>();
+        existingPlayers.add(hostId); // Always include host
+        for (ClientPeer existingClient : connectedClients) {
+            if (!existingClient.getUserId().equals(client.getUserId())) {
+                existingPlayers.add(existingClient.getUserId());
+            }
+        }
+        client.receiveGameUpdate(new GameUpdateMessage(
+            GameUpdateMessage.MessageType.PLAYERS_LIST,
+            existingPlayers
+        ));
+        
+        // Notify API of player join
+        if (gameCode != null && apiClient != null) {
+            apiClient.notifyPlayerJoin(gameCode);
+        }
+        
         // Notify all clients of new player
         broadcast(new GameUpdateMessage(
             GameUpdateMessage.MessageType.PLAYER_JOINED,
@@ -146,6 +166,11 @@ public class DesignatedHost {
     public void unregisterClient(ClientPeer client) {
         connectedClients.remove(client);
         gameEngine.removePlayer(client.getUserId());
+        
+        // Notify API of player leave
+        if (gameCode != null && apiClient != null) {
+            apiClient.notifyPlayerLeave(gameCode);
+        }
         
         broadcast(new GameUpdateMessage(
             GameUpdateMessage.MessageType.PLAYER_LEFT,
@@ -225,6 +250,13 @@ public class DesignatedHost {
      */
     public void shutdown() {
         running = false;
+        
+        // Unregister from API
+        if (gameCode != null && apiClient != null) {
+            System.out.println("[HOST] Unregistering game from API: " + gameCode);
+            apiClient.unregisterGame(gameCode);
+        }
+        
         try {
             if (serverSocket != null && !serverSocket.isClosed()) {
                 serverSocket.close();
@@ -264,4 +296,26 @@ public class DesignatedHost {
             return "localhost:" + port;
         }
     }
+    
+    /**
+     * Set the game code for API cleanup
+     */
+    public void setGameCode(String gameCode) {
+        this.gameCode = gameCode;
+    }
+    
+    /**
+     * Set API client for cleanup
+     */
+    public void setApiClient(ApiClient apiClient) {
+        this.apiClient = apiClient;
+    }
+    
+    /**
+     * Get the game code
+     */
+    public String getGameCode() {
+        return gameCode;
+    }
+
 }

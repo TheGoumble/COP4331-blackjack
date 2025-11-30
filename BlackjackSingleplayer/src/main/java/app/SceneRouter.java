@@ -27,12 +27,24 @@ public class SceneRouter {
     private final Stage stage;
     private final ActiveGame game = new ActiveGame(); // single-player state
     private User currentUser; // Store user across navigation
+    private DesignatedHost activeHost; // Track active host for cleanup
 
     public SceneRouter(Stage stage) {
         this.stage = stage;
+        
+        // Add shutdown hook to cleanup on window close
+        stage.setOnCloseRequest(event -> {
+            if (activeHost != null) {
+                System.out.println("[APP] Window closing - shutting down host");
+                activeHost.shutdown();
+            }
+        });
     }
 
     public void showMenu() {
+        // Clear active host when returning to menu
+        this.activeHost = null;
+        
         MenuPageView menuView = new MenuPageView();
         MenuController controller = new MenuController(menuView, this, currentUser);
         
@@ -69,6 +81,9 @@ public class SceneRouter {
     }
 
     public void showMultiplayerTable(BlackjackPeer peer, DesignatedHost host, String sessionId) {
+        // Store host reference for cleanup
+        this.activeHost = host;
+        
         MultiplayerTableView tableView = new MultiplayerTableView();
         new MultiplayerTableController(peer, host, tableView, this, sessionId);
 

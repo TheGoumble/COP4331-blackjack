@@ -54,6 +54,20 @@ public class BlackjackPeer extends ClientPeer {
                 }
                 break;
                 
+            case PLAYERS_LIST:
+                // Initialize with existing players
+                if (message.getData() instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<String> players = (List<String>) message.getData();
+                    for (String playerId : players) {
+                        if (!playerId.equals(getUserId())) {
+                            playerBalances.put(playerId, 10000);
+                            playerHands.put(playerId, new ArrayList<>());
+                        }
+                    }
+                }
+                break;
+                
             case PLAYER_JOINED:
                 String joinedPlayer = (String) message.getData();
                 playerBalances.put(joinedPlayer, 10000);
@@ -106,13 +120,12 @@ public class BlackjackPeer extends ClientPeer {
     
     /**
      * Request full game state from host
-     * This will be handled by the server sending a full state update
+     * The host automatically broadcasts state updates, so this is handled passively
      */
     public void requestGameState() {
-        // For now, this is a placeholder
-        // In a full implementation, we'd send a REQUEST_GAME_STATE command to the host
-        // The host would then broadcast a GAME_STATE_UPDATE message
-        System.out.println("[PEER] Game state request (not yet implemented via network)");
+        // Game state updates are automatically broadcast by the host
+        // after each command execution, so no explicit request is needed
+        System.out.println("[PEER] Waiting for next game state broadcast from host");
     }
     
     // Getters for local game state

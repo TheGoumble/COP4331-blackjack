@@ -23,23 +23,25 @@ public class MultiplayerTableController {
     private final DesignatedHost host;
     private final MultiplayerTableView view;
     private final SceneRouter router;
-    private final String sessionId;
     private final boolean isHost;
     private boolean roundInProgress = false;
 
-    public MultiplayerTableController(BlackjackPeer peer, DesignatedHost host, MultiplayerTableView view, SceneRouter router, String sessionId) {
+    public MultiplayerTableController(BlackjackPeer peer, DesignatedHost host, MultiplayerTableView view, SceneRouter router, String gameCode) {
         this.peer = peer;
         this.host = host;
         this.view = view;
         this.router = router;
-        this.sessionId = sessionId;
         this.isHost = (host != null && host.getHostId().equals(peer.getUserId()));
 
         // Set game code/connection info in view
         if (isHost && host != null) {
+            // Set game code first
+            view.setGameCode(gameCode);
+            // Then set connection info which will use the game code
             view.setConnectionInfo(host.getConnectionString());
         } else {
-            view.setGameCode(sessionId);
+            // Client just shows they're connected
+            view.setGameCode("Connected");
         }
 
         // Wire up handlers
@@ -60,9 +62,8 @@ public class MultiplayerTableController {
         // Disconnect from game
         peer.disconnect();
         
-        // If this player is the host, shutdown server and stop broadcasting
+        // If this player is the host, shutdown server (unregisters from API)
         if (isHost && host != null) {
-            network.GameDiscoveryService.getInstance().stopBroadcasting();
             host.shutdown();
         }
         
@@ -116,6 +117,12 @@ public class MultiplayerTableController {
     private void handleGameUpdate(GameUpdateMessage message) {
         javafx.application.Platform.runLater(() -> {
             switch (message.getType()) {
+                case PLAYERS_LIST:
+                    // Received list of existing players
+                    view.showMessage("Connected! Loading players...");
+                    updateUI();
+                    break;
+                    
                 case PLAYER_JOINED:
                     view.showMessage( message.getData() + " joined the game!");
                     peer.requestGameState();
@@ -123,35 +130,35 @@ public class MultiplayerTableController {
                     break;
 
                 case PLAYER_LEFT:
-                    view.showMessage("❌ " + message.getData() + " left the game");
+                    view.showMessage(message.getData() + " left the game");
                     view.removePlayer((String) message.getData());
                     break;
 
                 case BET_PLACED:
-                    view.showMessage("💰 " + message.getData() + " placed their bet");
+                    view.showMessage(message.getData() + " placed their bet");
                     break;
 
                 case ROUND_STARTED:
                     roundInProgress = true;
-                    view.showMessage("🎲 Round started! Place your bets and make your moves.");
-                    view.setTurnIndicator("▶ BETTING PHASE - Place your bets!");
+                    view.showMessage("Round started! Place your bets and make your moves.");
+                    view.setTurnIndicator("BETTING PHASE - Place your bets!");
                     peer.requestGameState();
                     updateUI();
                     break;
 
                 case PLAYER_HIT:
-                    view.showMessage("🂠 " + message.getData() + " drew a card (HIT)");
+                    view.showMessage(message.getData() + " drew a card (HIT)");
                     peer.requestGameState();
                     updateUI();
                     break;
 
                 case PLAYER_STAND:
-                    view.showMessage("✋ " + message.getData() + " stands");
+                    view.showMessage(message.getData() + " stands");
                     break;
 
                 case DEALER_TURN:
-                    view.showMessage("🎴 Dealer's turn...");
-                    view.setTurnIndicator("🎴 DEALER'S TURN");
+                    view.showMessage("Dealer's turn...");
+                    view.setTurnIndicator("DEALER'S TURN");
                     peer.requestGameState();
                     updateUI();
                     break;
@@ -168,8 +175,8 @@ public class MultiplayerTableController {
                         view.showMessage(emoji + " Round ended! You: " + result);
                         view.setTurnIndicator(emoji + " Result: " + result);
                     } else {
-                        view.showMessage("🎯 Round ended! Check results.");
-                        view.setTurnIndicator("⏸ Round Over");
+                        view.showMessage("Round ended! Check results.");
+                        view.setTurnIndicator("Round Over");
                     }
                     peer.requestGameState();
                     updateUI();
@@ -187,11 +194,11 @@ public class MultiplayerTableController {
     
     private String getResultEmoji(model.GameResult result) {
         switch (result) {
-            case PLAYER_WIN: return "🎉";
-            case PLAYER_BLACKJACK: return "🎆";
-            case PUSH: return "🤝";
-            case DEALER_WIN: return "😔";
-            default: return "🎯";
+            case PLAYER_WIN: return "[WIN]";
+            case PLAYER_BLACKJACK: return "[BLACKJACK]";
+            case PUSH: return "[PUSH]";
+            case DEALER_WIN: return "[LOSE]";
+            default: return "[RESULT]";
         }
     }
 
@@ -227,12 +234,12 @@ public class MultiplayerTableController {
         // Update turn indicator
         if (!roundInProgress) {
             if (isHost) {
-                view.setTurnIndicator("⏸ Waiting - Click 'Start Round' to begin");
+                view.setTurnIndicator("Waiting - Click 'Start Round' to begin");
             } else {
-                view.setTurnIndicator("⏸ Waiting for host to start round");
+                view.setTurnIndicator("Waiting for host to start round");
             }
         } else {
-            view.setTurnIndicator("▶ Your Turn - Hit or Stand!");
+            view.setTurnIndicator("Your Turn - Hit or Stand!");
         }
     }
 }

@@ -1,12 +1,12 @@
 package controller;
 
 import app.SceneRouter;
-import network.GameDiscoveryService;
-import network.GameDiscoveryService.GameAnnouncement;
+import network.ApiClient;
+import network.ApiClient.GameInfo;
 import view.GameLobbyView;
-import javafx.application.Platform;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,57 +20,40 @@ public class GameLobbyController {
     private final GameLobbyView view;
     private final SceneRouter router;
     private final String userId;
-    private final GameDiscoveryService discoveryService;
+    private final ApiClient apiClient;
 
     public GameLobbyController(GameLobbyView view, SceneRouter router, String userId) {
         this.view = view;
         this.router = router;
         this.userId = userId;
-        this.discoveryService = GameDiscoveryService.getInstance();
+        this.apiClient = new ApiClient();
 
         // Wire up handlers
         view.setOnJoinSession(this::handleJoinSession);
         view.setOnRefresh(this::refreshGamesList);
         view.setOnBack(this::handleBackToMenu);
 
-        // Start discovery
-        startDiscovery();
-    }
-
-    /**
-     * Start listening for game announcements
-     */
-    private void startDiscovery() {
-        discoveryService.startListening();
-        
-        // Add listener to update UI when games are discovered
-        discoveryService.addUpdateListener(() -> {
-            Platform.runLater(this::refreshGamesList);
-        });
-        
-        // Initial refresh
+        // Initial refresh when page loads
         refreshGamesList();
     }
 
     /**
-     * Refresh the list of available games
+     * Refresh the list of available games from API
      */
     private void refreshGamesList() {
-        Map<String, GameAnnouncement> discovered = discoveryService.getDiscoveredGames();
-        System.out.println("[LOBBY] Refreshing games list. Found " + discovered.size() + " games.");
+        List<GameInfo> games = apiClient.listGames();
+        System.out.println("[LOBBY] Refreshing games list from API. Found " + games.size() + " game(s).");
         
         Map<String, String> displayGames = new LinkedHashMap<>();
         
-        for (Map.Entry<String, GameAnnouncement> entry : discovered.entrySet()) {
-            GameAnnouncement game = entry.getValue();
-            String display = String.format("Game: %s... - Host: %s - Address: %s:%d",
-                game.sessionId.substring(0, Math.min(8, game.sessionId.length())),
+        for (GameInfo game : games) {
+            String display = String.format("Code: %s - Host: %s - Address: %s:%d",
+                game.gameCode,
                 game.hostId,
                 game.address,
                 game.port
             );
-            displayGames.put(entry.getKey(), display);
-            System.out.println("[LOBBY] Added game: " + display);
+            displayGames.put(game.gameCode, display);
         }
         
         view.updateGamesList(displayGames);
@@ -79,10 +62,27 @@ public class GameLobbyController {
     private void handleJoinSession(String input) {
         System.out.println("[LOBBY] Attempting to join: " + input);
         
-        // Input is the display string from the list, extract IP:port
-        String[] parts = input.split(":");
+        // Check if it's a 6-character game code
+        if (input.length() == 6 && input.matches("[A-Z0-9]+")) {
+            GameInfo game = apiClient.getGame(input);
+            if (game != null) {
+                System.out.println("[LOBBY] Game code found: " + input + " -> " + game.getConnectionString());
+                connectToAddress(game.getConnectionString());
+            } else {
+                view.setStatus("Game code not found: " + input);
+            }
+            return;
+        }
+        
+        // Otherwise treat as IP:port
+        connectToAddress(input);
+    }
+    
+    private void connectToAddress(String addressPort) {
+        // Input is either from list or direct IP:port
+        String[] parts = addressPort.split(":");
         if (parts.length != 2) {
-            view.setStatus("Invalid game selection");
+            view.setStatus("Invalid format. Use Game Code or IP:Port");
             return;
         }
         
@@ -90,11 +90,11 @@ public class GameLobbyController {
             String host = parts[0].trim();
             int port = Integer.parseInt(parts[1].trim());
             
-            System.out.println("[LOBBY] Connecting to discovered game at " + host + ":" + port);
+            System.out.println("[LOBBY] Connecting to " + host + ":" + port);
             router.joinGameByAddress(userId, host, port);
             
         } catch (NumberFormatException e) {
-            view.setStatus("Invalid port number in game announcement");
+            view.setStatus("Invalid port number");
         } catch (Exception e) {
             view.setStatus("Connection failed: " + e.getMessage());
             System.err.println("[LOBBY] Connection error: " + e.getMessage());
@@ -102,7 +102,7 @@ public class GameLobbyController {
     }
 
     private void handleBackToMenu() {
-        discoveryService.stopListening();
+        // No cleanup needed - API is stateless
         router.showMenu();
     }
 }

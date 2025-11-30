@@ -40,6 +40,8 @@ public class MultiplayerTableView extends BorderPane {
     private final Label gameCodeLabel = new Label("");
     private final Label myBalanceLabel = new Label("Your Balance: $0");
 
+    private String currentGameCode = "";
+    
     private Consumer<Integer> onBet = amount -> {};
     private Runnable onHit = () -> {};
     private Runnable onStand = () -> {};
@@ -209,13 +211,45 @@ public class MultiplayerTableView extends BorderPane {
     public void setOnBackToMenu(Runnable handler) {
         this.onBackToMenu = handler;
     }
-
-    public void setGameCode(String sessionId) {
-        gameCodeLabel.setText("Game Code: " + sessionId);
-    }
     
     public void setConnectionInfo(String connectionString) {
-        gameCodeLabel.setText("Share this address: " + connectionString);
+        try {
+            String[] parts = connectionString.split(":");
+            if (parts.length == 2) {
+                String localIP = parts[0];
+                String port = parts[1];
+                // Update display with current game code
+                updateHostDisplay(localIP, port);
+            } else {
+                gameCodeLabel.setText("HOST | Connection: " + connectionString);
+            }
+        } catch (Exception e) {
+            gameCodeLabel.setText("HOST | Port: " + connectionString);
+        }
+    }
+    
+    public void setGameCode(String gameCode) {
+        this.currentGameCode = gameCode;
+        // Don't overwrite full display, just update it
+        if (gameCode.equals("Connected")) {
+            gameCodeLabel.setText("CLIENT | Connected to game");
+        } else {
+            // This is a host with a game code - will be updated by setConnectionInfo
+            updateHostDisplay(null, null);
+        }
+    }
+    
+    private void updateHostDisplay(String localIP, String port) {
+        if (currentGameCode.isEmpty()) {
+            gameCodeLabel.setText("HOST | Loading game code...");
+        } else if (localIP != null && port != null) {
+            gameCodeLabel.setText(String.format(
+                "GAME CODE: %s | LAN: %s:%s | Internet: YourPublicIP:%s",
+                currentGameCode, localIP, port, port
+            ));
+        } else {
+            gameCodeLabel.setText("GAME CODE: " + currentGameCode);
+        }
     }
     
     public void setTurnIndicator(String message) {
@@ -230,11 +264,9 @@ public class MultiplayerTableView extends BorderPane {
         private final TextArea cardsArea;
         private final Label balanceLabel;
         private final Label totalLabel;
-        private final String playerId;
 
         public PlayerPanel(String playerId, String displayName) {
             super(5);
-            this.playerId = playerId;
 
             nameLabel = new Label(displayName);
             nameLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
@@ -273,7 +305,7 @@ public class MultiplayerTableView extends BorderPane {
 
             if (isActive) {
                 setStyle("-fx-background-color: #4d6d3a; -fx-background-radius: 5; -fx-border-color: yellow; -fx-border-width: 3; -fx-border-radius: 5;");
-                nameLabel.setText(nameLabel.getText().split(" ")[0] + " \u2b50 YOUR TURN \u2b50");
+                nameLabel.setText(nameLabel.getText().split(" ")[0] + " [YOUR TURN]");
                 nameLabel.setTextFill(Color.YELLOW);
             } else {
                 setStyle("-fx-background-color: #3d5d2a; -fx-background-radius: 5; -fx-border-color: #ffffff; -fx-border-radius: 5;");
