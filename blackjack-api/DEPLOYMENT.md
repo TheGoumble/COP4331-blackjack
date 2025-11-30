@@ -2,10 +2,7 @@
 
 ## Prerequisites
 
-1. **Google Cloud Account** - Free tier includes:
-   - 2 million requests/month
-   - 360,000 GB-seconds
-   - $300 free credit for new users
+1. **Google Cloud Account**
 
 2. **Install Google Cloud CLI**
    - Download: https://cloud.google.com/sdk/docs/install
@@ -119,96 +116,3 @@ gcloud run deploy blackjack-api --source . --region us-central1
 ```powershell
 gcloud run services delete blackjack-api --region us-central1
 ```
-
-## Cost Breakdown (Free Tier)
-
-**Your Expected Usage:**
-- ~10 games/day = 300 games/month
-- ~5 API calls per game = 1,500 requests/month
-- **Cost: $0.00** (well under 2M request limit)
-
-**What uses quota:**
-- Game registration: 1 request
-- Lobby refresh: 1 request each
-- Join/leave: 1 request each
-
-**Free tier covers:**
-- Up to 2 million requests/month
-- Up to 360,000 GB-seconds compute time
-- 1 GB network egress
-
-## Troubleshooting
-
-**Error: "Project not found"**
-```powershell
-gcloud config set project blackjack-matchmaking
-```
-
-**Error: "Permission denied"**
-```powershell
-gcloud auth login
-gcloud auth application-default login
-```
-
-**Error: "Service not found"**
-- Check region: `gcloud run services list`
-- Deployment may have failed - check: `gcloud run services describe blackjack-api --region us-central1`
-
-**API returns 404:**
-- Check URL format: `https://xxx.run.app/api/games/list` (note `/api` prefix)
-- View logs: `gcloud run services logs read blackjack-api --region us-central1`
-
-## Alternative: Quick Deploy Button
-
-1. Go to https://console.cloud.google.com/run
-2. Click "Create Service"
-3. Select "Deploy from source"
-4. Connect to your GitHub repo
-5. Set source location: `/blackjack-api`
-6. Click "Deploy"
-
-## Environment Variables (Optional)
-
-To add custom config:
-```powershell
-gcloud run deploy blackjack-api `
-  --source . `
-  --region us-central1 `
-  --set-env-vars MAX_PLAYERS=4,CLEANUP_INTERVAL=600000
-```
-
-Update `server.js` to read:
-```javascript
-const MAX_PLAYERS = process.env.MAX_PLAYERS || 4;
-const CLEANUP_INTERVAL = process.env.CLEANUP_INTERVAL || (10 * 60 * 1000);
-```
-
-## Custom Domain (Optional)
-
-If you own a domain:
-```powershell
-gcloud run domain-mappings create --service blackjack-api --domain api.yourdomain.com --region us-central1
-```
-
-Then update DNS:
-```
-Type: CNAME
-Name: api
-Value: ghs.googlehosted.com
-```
-
-## Production Checklist
-
-- [ ] API deployed and responding
-- [ ] Health endpoint returns 200
-- [ ] Can register/list/join/leave games
-- [ ] Java client updated with production URL
-- [ ] Tested with 2+ clients
-- [ ] Logs show correct behavior
-- [ ] Set billing alerts (optional)
-
-## Need Help?
-
-- Cloud Run Docs: https://cloud.google.com/run/docs
-- Pricing Calculator: https://cloud.google.com/products/calculator
-- Support: https://cloud.google.com/support
