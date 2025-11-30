@@ -210,13 +210,21 @@ public class MultiplayerTableController {
         // Update all players
         Map<String, List<Card>> playerHands = peer.getPlayerHands();
         Map<String, Integer> playerBalances = peer.getPlayerBalances();
+        Map<String, String> playerDisplayNames = peer.getPlayerDisplayNames();
 
         for (String playerId : playerHands.keySet()) {
             List<Card> hand = playerHands.get(playerId);
             int balance = playerBalances.getOrDefault(playerId, 0);
             boolean isActive = playerId.equals(peer.getUserId()) && roundInProgress;
             
-            String displayName = playerId.equals(peer.getUserId()) ? "You" : playerId;
+            // Use display name - show "You" for current player, otherwise use their display name
+            String displayName;
+            if (playerId.equals(peer.getUserId())) {
+                displayName = "You (" + peer.getDisplayName() + ")";
+            } else {
+                // Get display name from synced map, fallback to userId if not found
+                displayName = playerDisplayNames.getOrDefault(playerId, playerId);
+            }
             view.updatePlayer(playerId, displayName, hand, balance, isActive);
         }
 

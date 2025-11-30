@@ -15,6 +15,7 @@ import java.util.function.Consumer;
  */
 public class ClientPeer {
     private final String userId;
+    private String displayName;
     private Socket socket;
     private ObjectOutputStream out;
     private ObjectInputStream in;
@@ -24,6 +25,7 @@ public class ClientPeer {
     
     public ClientPeer(String userId) {
         this.userId = userId;
+        this.displayName = userId; // Default to userId
         this.updateListeners = new ArrayList<>();
         this.connected = false;
     }
@@ -33,6 +35,7 @@ public class ClientPeer {
      */
     public ClientPeer(String userId, Socket socket, ObjectInputStream in, ObjectOutputStream out) {
         this.userId = userId;
+        this.displayName = userId; // Default to userId
         this.socket = socket;
         this.in = in;
         this.out = out;
@@ -50,14 +53,15 @@ public class ClientPeer {
             // Create socket with connection timeout
             socket = new Socket();
             socket.connect(new InetSocketAddress(hostAddress, port), 10000); // 10 second timeout
-            socket.setSoTimeout(30000); // 30 second read timeout
+            // No read timeout - wait indefinitely for game updates
             
             out = new ObjectOutputStream(socket.getOutputStream());
             out.flush();
             in = new ObjectInputStream(socket.getInputStream());
             
-            // Send our user ID to the host
+            // Send our user ID and display name to the host
             out.writeObject(userId);
+            out.writeObject(displayName);
             out.flush();
             
             connected = true;
@@ -182,6 +186,14 @@ public class ClientPeer {
     
     public String getUserId() {
         return userId;
+    }
+    
+    public String getDisplayName() {
+        return displayName;
+    }
+    
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
     
     public boolean isConnected() {

@@ -61,6 +61,10 @@ public class SceneRouter {
     public User getCurrentUser() {
         return currentUser;
     }
+    
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+    }
 
     public void showSinglePlayerTable() {
         DealerTableView tableView = new DealerTableView();
@@ -84,6 +88,9 @@ public class SceneRouter {
         // Store host reference for cleanup
         this.activeHost = host;
         
+        // Display name should already be set before connecting
+        // (see CreateGameObserver, joinGameSession, joinGameByAddress)
+        
         MultiplayerTableView tableView = new MultiplayerTableView();
         new MultiplayerTableController(peer, host, tableView, this, sessionId);
 
@@ -95,6 +102,9 @@ public class SceneRouter {
     public void joinGameSession(String userId, String sessionId, DesignatedHost host) {
         // Create peer for this player and connect to host
         BlackjackPeer peer = new BlackjackPeer(userId);
+        if (currentUser != null) {
+            peer.setDisplayName(currentUser.getDisplayName());
+        }
         peer.connectToHost(host);
         
         // Navigate to multiplayer table
@@ -105,6 +115,9 @@ public class SceneRouter {
         try {
             // Create peer for this player and connect via network
             BlackjackPeer peer = new BlackjackPeer(userId);
+            if (currentUser != null) {
+                peer.setDisplayName(currentUser.getDisplayName());
+            }
             peer.connectToHost(hostAddress, port);
             
             // Navigate to multiplayer table (no host reference for remote connections)

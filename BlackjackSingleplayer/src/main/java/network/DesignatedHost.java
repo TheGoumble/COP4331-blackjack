@@ -17,6 +17,7 @@ public class DesignatedHost {
     private final GameEngine gameEngine;
     private final List<ClientPeer> connectedClients;
     private final String hostId;
+    private String displayName;
     private ServerSocket serverSocket;
     private Thread acceptThread;
     private boolean running;
@@ -24,8 +25,9 @@ public class DesignatedHost {
     private String gameCode;
     private ApiClient apiClient;
     
-    public DesignatedHost(String hostId) {
+    public DesignatedHost(String hostId, String displayName) {
         this.hostId = hostId;
+        this.displayName = displayName != null ? displayName : hostId;
         this.gameEngine = new GameEngine();
         this.connectedClients = new CopyOnWriteArrayList<>();
         this.port = findAvailablePort();
@@ -96,12 +98,14 @@ public class DesignatedHost {
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             
-            // Read the client's user ID
+            // Read the client's user ID and display name
             String userId = (String) in.readObject();
-            System.out.println("[HOST] Client identified as: " + userId);
+            String displayName = (String) in.readObject();
+            System.out.println("[HOST] Client identified as: " + userId + " (" + displayName + ")");
             
             // Create a ClientPeer for this connection
             ClientPeer client = new ClientPeer(userId, socket, in, out);
+            client.setDisplayName(displayName);
             registerClient(client);
             
             // Listen for commands from this client
@@ -136,11 +140,11 @@ public class DesignatedHost {
         gameEngine.addPlayer(client.getUserId(), 10000);
         
         // Send existing players list to the new client
-        List<String> existingPlayers = new ArrayList<>();
-        existingPlayers.add(hostId); // Always include host
+        List<PlayerInfo> existingPlayers = new ArrayList<>();
+        existingPlayers.add(new PlayerInfo(hostId, getDisplayName())); // Always include host
         for (ClientPeer existingClient : connectedClients) {
             if (!existingClient.getUserId().equals(client.getUserId())) {
-                existingPlayers.add(existingClient.getUserId());
+                existingPlayers.add(new PlayerInfo(existingClient.getUserId(), existingClient.getDisplayName()));
             }
         }
         client.receiveGameUpdate(new GameUpdateMessage(
@@ -156,7 +160,7 @@ public class DesignatedHost {
         // Notify all clients of new player
         broadcast(new GameUpdateMessage(
             GameUpdateMessage.MessageType.PLAYER_JOINED,
-            client.getUserId()
+            new PlayerInfo(client.getUserId(), client.getDisplayName())
         ));
     }
     
@@ -279,6 +283,14 @@ public class DesignatedHost {
     
     public String getHostId() {
         return hostId;
+    }
+    
+    public String getDisplayName() {
+        return displayName;
+    }
+    
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
     
     public int getConnectedClientCount() {

@@ -39,8 +39,12 @@ public class CreateGameObserver implements MenuObserver {
         sessionId = "game_" + System.currentTimeMillis();
         gameCode = generateGameCode();
         
+        // Get display name from router's current user
+        String displayName = router.getCurrentUser() != null ? 
+            router.getCurrentUser().getDisplayName() : userId;
+        
         // Create host (P2P server)
-        host = new DesignatedHost(userId);
+        host = new DesignatedHost(userId, displayName);
         
         // Register game with API matchmaking server
         String hostAddress = host.getConnectionString().split(":")[0];
@@ -56,6 +60,10 @@ public class CreateGameObserver implements MenuObserver {
         
         // Create peer for this player and connect to host
         peer = new BlackjackPeer(userId);
+        
+        // Set display name BEFORE connecting (reuse variable from above)
+        peer.setDisplayName(displayName);
+        
         peer.connectToHost(host);
         
         // Store game code in host for cleanup later

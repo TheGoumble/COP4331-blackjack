@@ -13,12 +13,14 @@ public class BlackjackPeer extends ClientPeer {
     private Object localGameState;
     private Map<String, List<Card>> playerHands;
     private Map<String, Integer> playerBalances;
+    private Map<String, String> playerDisplayNames; // Map userId to displayName
     private List<Card> dealerHand;
     
     public BlackjackPeer(String userId) {
         super(userId);
         this.playerHands = new HashMap<>();
         this.playerBalances = new HashMap<>();
+        this.playerDisplayNames = new HashMap<>();
         this.dealerHand = new ArrayList<>();
         
         // Register listener to update local state
@@ -58,20 +60,24 @@ public class BlackjackPeer extends ClientPeer {
                 // Initialize with existing players
                 if (message.getData() instanceof List) {
                     @SuppressWarnings("unchecked")
-                    List<String> players = (List<String>) message.getData();
-                    for (String playerId : players) {
-                        if (!playerId.equals(getUserId())) {
-                            playerBalances.put(playerId, 10000);
-                            playerHands.put(playerId, new ArrayList<>());
+                    List<PlayerInfo> players = (List<PlayerInfo>) message.getData();
+                    for (PlayerInfo player : players) {
+                        if (!player.getUserId().equals(getUserId())) {
+                            playerBalances.put(player.getUserId(), 10000);
+                            playerHands.put(player.getUserId(), new ArrayList<>());
+                            playerDisplayNames.put(player.getUserId(), player.getDisplayName());
                         }
                     }
                 }
                 break;
                 
             case PLAYER_JOINED:
-                String joinedPlayer = (String) message.getData();
-                playerBalances.put(joinedPlayer, 10000);
-                playerHands.put(joinedPlayer, new ArrayList<>());
+                if (message.getData() instanceof PlayerInfo) {
+                    PlayerInfo joinedPlayer = (PlayerInfo) message.getData();
+                    playerBalances.put(joinedPlayer.getUserId(), 10000);
+                    playerHands.put(joinedPlayer.getUserId(), new ArrayList<>());
+                    playerDisplayNames.put(joinedPlayer.getUserId(), joinedPlayer.getDisplayName());
+                }
                 break;
                 
             case PLAYER_LEFT:
@@ -151,5 +157,9 @@ public class BlackjackPeer extends ClientPeer {
     
     public int getMyBalance() {
         return playerBalances.getOrDefault(getUserId(), 0);
+    }
+    
+    public Map<String, String> getPlayerDisplayNames() {
+        return new HashMap<>(playerDisplayNames);
     }
 }

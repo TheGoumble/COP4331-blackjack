@@ -41,22 +41,35 @@ public class MenuController {
 
     /**
      * Prompt for user name when menu first loads
+     * Required - keeps prompting until valid name is entered
      */
     private void promptForName() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Enter Name");
-        dialog.setHeaderText("Welcome to Blackjack!");
-        dialog.setContentText("Please enter your display name:");
+        String displayName = null;
+        
+        while (displayName == null || displayName.trim().isEmpty()) {
+            TextInputDialog dialog = new TextInputDialog();
+            dialog.setTitle("Enter Name - Required");
+            dialog.setHeaderText("Welcome to Blackjack!");
+            dialog.setContentText("Please enter your display name:");
+            
+            // Remove the cancel button to force input
+            dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL).setVisible(false);
 
-        Optional<String> result = dialog.showAndWait();
-        if (result.isPresent() && !result.get().trim().isEmpty()) {
-            String displayName = result.get().trim();
-            String userId = "player_" + System.currentTimeMillis();
-            currentUser = new User(userId, displayName);
-        } else {
-            // If user cancels, set a default guest user
-            currentUser = new User("guest_" + System.currentTimeMillis(), "Guest");
+            Optional<String> result = dialog.showAndWait();
+            if (result.isPresent() && !result.get().trim().isEmpty()) {
+                displayName = result.get().trim();
+            } else {
+                // Show warning if empty
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+                alert.setTitle("Name Required");
+                alert.setHeaderText("You must enter a name to continue");
+                alert.setContentText("Please enter your display name to play Blackjack.");
+                alert.showAndWait();
+            }
         }
+        
+        String userId = "player_" + System.currentTimeMillis();
+        currentUser = new User(userId, displayName);
     }
 
     private void wireActions() {
@@ -67,10 +80,12 @@ public class MenuController {
         
         view.multiplayerItem.setOnAction(e -> {
             menuSubject.notifyMenuObserver("CREATE_GAME", currentUser.getUserId());
+            router.setCurrentUser(currentUser); // Pass user to router
         });
 
         view.joinGameButton.setOnAction(e -> {
             menuSubject.notifyMenuObserver("JOIN_GAME", currentUser.getUserId());
+            router.setCurrentUser(currentUser); // Pass user to router
         });
 
         view.tutorialButton.setOnAction(e -> {
