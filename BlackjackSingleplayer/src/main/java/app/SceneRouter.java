@@ -68,7 +68,7 @@ public class SceneRouter {
 
     public void showSinglePlayerTable() {
         DealerTableView tableView = new DealerTableView();
-        new DealerTableController(game, tableView);
+        new DealerTableController(game, tableView, this);
 
         Scene scene = new Scene(tableView, 900, 600);
         stage.setScene(scene);

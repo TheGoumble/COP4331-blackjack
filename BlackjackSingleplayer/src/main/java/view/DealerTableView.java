@@ -37,6 +37,7 @@ public class DealerTableView extends BorderPane {
     private final Label potAmountLabel = new Label("$0");
     private final Label resultLabel = new Label("");
     private final Button newRoundButton = new Button("New Round");
+    private final Button backToMenuButton = new Button("Back to Menu");
 
     private final Label statusLabel = new Label("Place a bet to start.");
     
@@ -46,6 +47,7 @@ public class DealerTableView extends BorderPane {
     private Consumer<Integer> onBet = amount -> {};
     private Runnable onHit = () -> {};
     private Runnable onStand = () -> {};
+    private Runnable onBackToMenu = () -> {};
 
     public DealerTableView() {
         setPadding(new Insets(10));
@@ -178,7 +180,7 @@ public class DealerTableView extends BorderPane {
         potBox.setAlignment(Pos.CENTER);
         potBox.setPadding(new Insets(5));
         
-        // New Round button - positioned to the right of pot
+        // New Round button 
         styleButton(newRoundButton);
         newRoundButton.setPrefWidth(140);
         newRoundButton.setStyle(
@@ -215,7 +217,7 @@ public class DealerTableView extends BorderPane {
             "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
         ));
         
-        // New Round button area (separate from pot to avoid overlap)
+        // New Round button area 
         VBox newRoundBox = new VBox(newRoundButton);
         newRoundBox.setAlignment(Pos.CENTER);
         newRoundBox.setPadding(new Insets(5, 0, 0, 0));
@@ -252,7 +254,7 @@ public class DealerTableView extends BorderPane {
         
         setCenter(centerArea);
 
-        // === RIGHT SIDE - Balance Info ===
+        //  Balence Info  
         Label infoLabel = new Label("GAME INFO");
         infoLabel.setStyle(
             "-fx-font-size: 20px; " +
@@ -328,7 +330,47 @@ public class DealerTableView extends BorderPane {
         separator3.setStyle("-fx-background-color: rgba(255,255,255,0.3); -fx-pref-height: 2;");
         separator3.setMaxWidth(160);
         
-        VBox rightPanel = new VBox(15, infoLabel, balanceBox, separator1, betBox, separator2, winBox, separator3, newRoundButton);
+        // Back to Menu button
+        styleButton(backToMenuButton);
+        backToMenuButton.setPrefWidth(160);
+        backToMenuButton.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: #8B0000; " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 10 15 10 15; " +
+            "-fx-background-radius: 5; " +
+            "-fx-cursor: hand; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+        );
+        
+        backToMenuButton.setOnMouseEntered(e -> backToMenuButton.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: #A52A2A; " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 10 15 10 15; " +
+            "-fx-background-radius: 5; " +
+            "-fx-cursor: hand; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(139,0,0,0.7), 8, 0, 3, 3);"
+        ));
+        
+        backToMenuButton.setOnMouseExited(e -> backToMenuButton.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: #8B0000; " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 10 15 10 15; " +
+            "-fx-background-radius: 5; " +
+            "-fx-cursor: hand; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+        ));
+        
+        Region separator4 = new Region();
+        separator4.setStyle("-fx-background-color: rgba(255,255,255,0.3); -fx-pref-height: 2;");
+        separator4.setMaxWidth(160);
+        
+        VBox rightPanel = new VBox(15, infoLabel, balanceBox, separator1, betBox, separator2, winBox, separator3, newRoundButton, separator4, backToMenuButton);
         rightPanel.setAlignment(Pos.TOP_CENTER);
         rightPanel.setStyle(
             "-fx-background-color: rgba(0,0,0,0.4); " +
@@ -369,6 +411,8 @@ public class DealerTableView extends BorderPane {
             newRoundButton.setVisible(false);
             statusLabel.setText("Place a bet to start.");
         });
+        
+        backToMenuButton.setOnAction(e -> onBackToMenu.run());
     }
 
     public void setOnBet(Consumer<Integer> handler) {
@@ -381,6 +425,10 @@ public class DealerTableView extends BorderPane {
 
     public void setOnStand(Runnable handler) {
         this.onStand = handler;
+    }
+    
+    public void setOnBackToMenu(Runnable handler) {
+        this.onBackToMenu = handler;
     }
 
     public void showMessage(String message) {
@@ -534,7 +582,7 @@ public class DealerTableView extends BorderPane {
     }
 
     /**
-     * Creates a hidden (face-down) card
+     * Creates a hidden card
      */
     private VBox createHiddenCard() {
         Label hiddenLabel = new Label("?");
@@ -629,7 +677,7 @@ public class DealerTableView extends BorderPane {
     }
     
     /**
-     * Creates a display chip (non-interactive)
+     * Creates a display chip
      */
     private Label createDisplayChip(int value, String bgColor, String textColor) {
         Label chip = new Label("$" + value);
@@ -653,24 +701,20 @@ public class DealerTableView extends BorderPane {
         return chip;
     }
     
-    /**
-     * Adds chip value to current bet
-     */
+   
     private void addToBet(int amount) {
         currentBetAmount += amount;
         currentBetLabel.setText("Current Bet: $" + currentBetAmount);
     }
     
-    /**
-     * Clears the current bet
-     */
+    
     private void clearBet() {
         currentBetAmount = 0;
         currentBetLabel.setText("Current Bet: $0");
     }
     
     /**
-     * Places bet into the pot (single chip with total amount)
+     * Places bet into the pot 
      */
     private void placeBetInPot(int amount) {
         potAmount = amount;
@@ -699,21 +743,13 @@ public class DealerTableView extends BorderPane {
         potAmountLabel.setText("$" + potAmount);
         clearBet();
     }
-    
-    /**
-     * Clears the pot
-     */
+  
     private void clearPot() {
         potAmount = 0;
         potChipDisplay.getChildren().clear();
         potAmountLabel.setText("$0");
     }
     
-
-
-    /**
-     * Style a button with consistent appearance
-     */
     private void styleButton(Button button) {
         button.setStyle(
             "-fx-font-size: 14px; " +

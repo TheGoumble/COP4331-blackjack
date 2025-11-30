@@ -1,5 +1,6 @@
 package controller;
 
+import app.SceneRouter;
 import model.ActiveGame;
 import view.DealerTableView;
 /**
@@ -10,18 +11,26 @@ public class DealerTableController {
 
     private final ActiveGame game;
     private final DealerTableView view;
+    private final SceneRouter router;
 
-    public DealerTableController(ActiveGame game, DealerTableView view) {
+    public DealerTableController(ActiveGame game, DealerTableView view, SceneRouter router) {
         this.game = game;
         this.view = view;
+        this.router = router;
 
         // Wire up handlers
         view.setOnBet(this::handleBet);
         view.setOnHit(this::handleHit);
         view.setOnStand(this::handleStand);
+        view.setOnBackToMenu(this::handleBackToMenu);
 
         // initial render
         view.render(game);
+    }
+    
+    private void handleBackToMenu() {
+        // Navigate back to menu
+        router.showMenu();
     }
 
     private void handleBet(int amount) {
