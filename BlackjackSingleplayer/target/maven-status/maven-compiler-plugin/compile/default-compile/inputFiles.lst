@@ -35,6 +35,12 @@ B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src
 B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\observer\MenuObserver.java
 B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\observer\MenuSubject.java
 B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\observer\TutorialObserver.java
+B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\strategy\AbstractBlackjackStrategy.java
+B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\strategy\BlackjackStrategy.java
+B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\strategy\ClassicStrategy.java
+B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\strategy\EuropeanStrategy.java
+B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\strategy\ModernCasinoStrategy.java
+B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\strategy\StrategyFactory.java
 B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\util\CardVisuals.java
 B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\util\StyleConstants.java
 B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\view\components\ChipBettingPanel.java
@@ -44,4 +50,5 @@ B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src
 B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\view\GameLobbyView.java
 B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\view\MenuPageView.java
 B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\view\MultiplayerTableView.java
+B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\view\StrategySelector.java
 B:\Coding_Stuff\COP4331-java\Project\COP4331-blackjack\BlackjackSingleplayer\src\main\java\view\TutorialView.java

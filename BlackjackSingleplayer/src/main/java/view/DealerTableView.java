@@ -39,6 +39,7 @@ public class DealerTableView extends BorderPane {
     private final Label resultLabel = new Label("");
     private final Button newRoundButton = new Button("New Round");
     private final Button backToMenuButton = new Button("Back to Menu");
+    private final StrategySelector strategySelector = new StrategySelector();
 
     private final Label statusLabel = new Label("Place a bet to start.");
     
@@ -87,7 +88,7 @@ public class DealerTableView extends BorderPane {
         });
         
         // Left panel container
-        VBox leftPanel = new VBox(15, bettingPanel);
+        VBox leftPanel = new VBox(15, strategySelector, bettingPanel);
         leftPanel.setAlignment(Pos.TOP_CENTER);
         leftPanel.setStyle(
             "-fx-background-color: rgba(0,0,0,0.3); " +
@@ -460,5 +461,9 @@ public class DealerTableView extends BorderPane {
         potAmount = 0;
         potChipDisplay.getChildren().clear();
         potAmountLabel.setText("$0");
+    }
+    
+    public StrategySelector getStrategySelector() {
+        return strategySelector;
     }
 }

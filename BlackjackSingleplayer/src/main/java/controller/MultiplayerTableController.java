@@ -6,6 +6,8 @@ import model.Card;
 import network.BlackjackPeer;
 import network.DesignatedHost;
 import network.GameUpdateMessage;
+import strategy.BlackjackStrategy;
+import strategy.StrategyFactory;
 import view.MultiplayerTableView;
 
 import java.util.List;
@@ -50,6 +52,22 @@ public class MultiplayerTableController {
         view.setOnStand(this::handleStand);
         view.setOnStartRound(this::handleStartRound);
         view.setOnBackToMenu(this::handleBackToMenu);
+        
+        // Strategy selector: Only host can change strategy
+        if (isHost && host != null) {
+            view.getStrategySelector().setOnStrategyChange(strategy -> {
+                host.getGameEngine().setStrategy(strategy);
+                // Broadcast strategy change to all clients
+                host.broadcast(new GameUpdateMessage(
+                    GameUpdateMessage.MessageType.STRATEGY_CHANGED, 
+                    strategy.getVariantName()
+                ));
+                System.out.println("[HOST] Strategy changed to: " + strategy.getVariantName());
+            });
+        } else {
+            // Non-host players see the selector but cannot change it
+            view.getStrategySelector().disable();
+        }
 
         // Listen for game updates
         peer.addUpdateListener(this::handleGameUpdate);
@@ -225,6 +243,19 @@ public class MultiplayerTableController {
                     // Return to menu
                     peer.disconnect();
                     router.showMenu();
+                    break;
+                    
+                case STRATEGY_CHANGED:
+                    // Host has changed the game strategy - only update for non-host clients
+                    if (!isHost) {
+                        String strategyName = (String) message.getData();
+                        BlackjackStrategy newStrategy = StrategyFactory.getStrategy(strategyName);
+                        if (newStrategy != null) {
+                            view.getStrategySelector().setStrategy(strategyName);
+                            view.showMessage("⚙️ Strategy changed to: " + strategyName);
+                            System.out.println("[CLIENT] Strategy updated to: " + strategyName);
+                        }
+                    }
                     break;
 
                 default:

@@ -28,7 +28,8 @@ public class GameUpdateMessage implements Serializable {
         ROUND_ENDED,
         GAME_STATE_UPDATE,
         SPECTATOR_MODE,
-        HOST_DISCONNECTED
+        HOST_DISCONNECTED,
+        STRATEGY_CHANGED
     }
     
     public GameUpdateMessage(MessageType type, Object data) {

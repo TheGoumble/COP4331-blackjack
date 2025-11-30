@@ -2,6 +2,8 @@ package network;
 
 import command.Command;
 import model.GameEngine;
+import strategy.BlackjackStrategy;
+import strategy.StrategyFactory;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -26,12 +28,17 @@ public class DesignatedHost {
     private ApiClient apiClient;
     
     public DesignatedHost(String hostId, String displayName) {
+        this(hostId, displayName, StrategyFactory.getDefaultStrategy());
+    }
+    
+    public DesignatedHost(String hostId, String displayName, BlackjackStrategy strategy) {
         this.hostId = hostId;
         this.displayName = displayName != null ? displayName : hostId;
-        this.gameEngine = new GameEngine();
+        this.gameEngine = new GameEngine(strategy);
         this.connectedClients = new CopyOnWriteArrayList<>();
         this.port = findAvailablePort();
         this.running = false;
+        System.out.println("[HOST] Game created with strategy: " + strategy.getVariantName());
         startServer();
     }
     

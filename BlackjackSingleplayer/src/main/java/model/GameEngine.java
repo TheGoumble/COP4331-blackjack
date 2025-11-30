@@ -1,10 +1,15 @@
 package model;
 
+import strategy.BlackjackStrategy;
+import strategy.StrategyFactory;
 import java.util.*;
 
 /**
  * Multi-player game engine that manages game state for all players
  * Handles deck, player hands, balances, and game logic
+ * Uses Strategy Pattern for different blackjack rule variants
+ * 
+ * STRATEGY PATTERN: This is the Context
  * 
  * @author Group 12
  */
@@ -18,11 +23,16 @@ public class GameEngine {
     private final Set<String> bustedPlayers;
     private final List<String> playerOrder; // Track join order for turns
     private final Set<String> spectators; // Players who joined mid-game
+    private BlackjackStrategy strategy; // STRATEGY PATTERN: Reference to Strategy interface
     
     private boolean roundInProgress;
     private int currentPlayerIndex; // Index in playerOrder for whose turn it is
     
     public GameEngine() {
+        this(StrategyFactory.getDefaultStrategy());
+    }
+    
+    public GameEngine(BlackjackStrategy strategy) {
         this.deck = new Deck();
         this.playerBalances = new HashMap<>();
         this.currentHands = new HashMap<>();
@@ -32,6 +42,7 @@ public class GameEngine {
         this.bustedPlayers = new HashSet<>();
         this.playerOrder = new ArrayList<>();
         this.spectators = new HashSet<>();
+        this.strategy = strategy;
         this.roundInProgress = false;
         this.currentPlayerIndex = 0;
     }
@@ -451,5 +462,23 @@ public class GameEngine {
      */
     public Set<String> getSpectators() {
         return new HashSet<>(spectators);
+    }
+    
+    /**
+     * Get the current strategy being used
+     */
+    public BlackjackStrategy getStrategy() {
+        return strategy;
+    }
+    
+    /**
+     * Change the game strategy (can only be done between rounds)
+     */
+    public void setStrategy(BlackjackStrategy newStrategy) {
+        if (roundInProgress) {
+            throw new IllegalStateException("Cannot change strategy during an active round");
+        }
+        this.strategy = newStrategy;
+        System.out.println("[GAME] Strategy changed to: " + strategy.getVariantName());
     }
 }

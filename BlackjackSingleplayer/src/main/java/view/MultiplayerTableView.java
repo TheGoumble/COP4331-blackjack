@@ -46,6 +46,7 @@ public class MultiplayerTableView extends BorderPane {
     private final Label turnIndicatorLabel = new Label("");
     private final Label gameCodeLabel = new Label("");
     private final Label myBalanceLabel = new Label("Your Balance: $0");
+    private final StrategySelector strategySelector = new StrategySelector();
 
     private String currentGameCode = "";
     
@@ -82,9 +83,12 @@ public class MultiplayerTableView extends BorderPane {
         
         setCenter(tableContainer);
 
-        // Betting controls on left
+        // Betting controls on left with strategy selector
         VBox bettingPanel = createBettingPanel();
-        setLeft(bettingPanel);
+        VBox leftPanel = new VBox(15, strategySelector, bettingPanel);
+        leftPanel.setAlignment(Pos.TOP_CENTER);
+        leftPanel.setPadding(new Insets(10));
+        setLeft(leftPanel);
 
         // Info panel on right
         VBox infoPanel = createInfoPanel();
@@ -592,5 +596,9 @@ public class MultiplayerTableView extends BorderPane {
             
             potAmountLabel.setText("$" + potAmount);
         }
+    }
+    
+    public StrategySelector getStrategySelector() {
+        return strategySelector;
     }
 }
