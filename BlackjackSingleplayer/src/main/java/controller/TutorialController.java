@@ -4,7 +4,7 @@ import app.SceneRouter;
 import view.TutorialView;
 /**
  *
- * @author Bridjet Walker
+ * @author Bridjet Walker, Luca Lombardo
  */
 public class TutorialController {
 
@@ -20,5 +20,7 @@ public class TutorialController {
 
     private void wireActions() {
         view.exitButton.setOnAction(e -> router.showMenu());
+        view.nextButton.setOnAction(e -> view.nextSlide());
+        view.prevButton.setOnAction(e -> view.previousSlide());
     }
 }
