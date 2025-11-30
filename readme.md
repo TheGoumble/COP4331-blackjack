@@ -41,7 +41,7 @@ COP4331-blackjack/
 │
 ├── readme.md
 ├── INTERNET_PLAY_GUIDE.md
-├── secrets.properties.example       # API URL template (copy to secrets.properties)
+├── .gitignore                       # Excludes secrets.properties
 │
 ├── blackjack-api/                   # Node.js matchmaking API
 │   ├── server.js                    # Express server
@@ -51,6 +51,7 @@ COP4331-blackjack/
 │
 └── BlackjackSingleplayer/
     ├── pom.xml                      # Maven configuration
+    ├── secrets.properties.template  # API config template (copy and fill in)
     └── src/main/java/
         ├── app/
         │   ├── MainApp.java         # Application entry point
@@ -112,10 +113,15 @@ cd COP4331-blackjack
 ### 2. Setup Secrets File
 ```powershell
 cd BlackjackSingleplayer
-Copy-Item secrets.properties.example secrets.properties
+Copy-Item secrets.properties.template secrets.properties
 ```
 
-The `secrets.properties` file contains the API URL. **Do not commit this file.**
+Edit `secrets.properties` and add your API URL:
+```properties
+api.url=https://your-api-url.run.app/api
+```
+
+The `secrets.properties` file contains the API URL for matchmaking. **This file is gitignored and should never be committed.**
 
 ### 3. Run the Game
 ```powershell

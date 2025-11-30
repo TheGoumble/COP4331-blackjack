@@ -3,6 +3,9 @@ package view;
 import model.ActiveGame;
 import model.CardInPlay;
 import model.GameResult;
+import util.CardVisuals;
+import util.StyleConstants;
+import view.components.ChipBettingPanel;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -26,12 +29,10 @@ public class DealerTableView extends BorderPane {
     private final Label betInfoLabel = new Label("Current bet: 0");
     private final Label lastWinLabel = new Label("$0");
 
-    private final Button betButton = new Button("Place Bet");
-    private final Button clearBetButton = new Button("Clear Bet");
     private final Button hitButton = new Button("Hit");
     private final Button standButton = new Button("Stand");
     
-    private final Label currentBetLabel = new Label("Current Bet: $0");
+    private final ChipBettingPanel bettingPanel = new ChipBettingPanel();
     private final Label potLabel = new Label("POT");
     private final VBox potChipDisplay = new VBox(5);
     private final Label potAmountLabel = new Label("$0");
@@ -41,7 +42,6 @@ public class DealerTableView extends BorderPane {
 
     private final Label statusLabel = new Label("Place a bet to start.");
     
-    private int currentBetAmount = 0;
     private int potAmount = 0;
 
     private Consumer<Integer> onBet = amount -> {};
@@ -51,71 +51,12 @@ public class DealerTableView extends BorderPane {
 
     public DealerTableView() {
         setPadding(new Insets(10));
-        setStyle("-fx-background-color: #2d5016;");
+        setStyle("-fx-background-color: " + StyleConstants.GREEN_FELT + ";");
 
-        // === Betting Controls ===
-        Label betLabel = new Label("BETTING");
-        betLabel.setStyle(
-            "-fx-font-size: 18px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-text-fill: #FFD700; " +
-            "-fx-font-family: 'Arial';"
-        );
-        
-        Label selectLabel = new Label("Select Chips:");
-        selectLabel.setStyle(
-            "-fx-font-size: 14px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-text-fill: white; " +
-            "-fx-font-family: 'Arial';"
-        );
-        
-        // Chip buttons in vertical layout for left side
-        VBox chipButtons = new VBox(8);
-        chipButtons.setAlignment(Pos.CENTER);
-        
-        Button chip1 = createChipButton(1, "white", "#333333");
-        Button chip5 = createChipButton(5, "#8B0000", "white");
-        Button chip10 = createChipButton(10, "#1E90FF", "white");
-        Button chip25 = createChipButton(25, "#228B22", "white");
-        Button chip50 = createChipButton(50, "#FF8C00", "white");
-        Button chip100 = createChipButton(100, "#2d2d2d", "white");
-        
-        chipButtons.getChildren().addAll(chip1, chip5, chip10, chip25, chip50, chip100);
-        
-        // Chip actions
-        chip1.setOnAction(e -> addToBet(1));
-        chip5.setOnAction(e -> addToBet(5));
-        chip10.setOnAction(e -> addToBet(10));
-        chip25.setOnAction(e -> addToBet(25));
-        chip50.setOnAction(e -> addToBet(50));
-        chip100.setOnAction(e -> addToBet(100));
-        
-        // Current bet display
-        currentBetLabel.setStyle(
-            "-fx-font-size: 14px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-text-fill: #FFD700; " +
-            "-fx-font-family: 'Arial';"
-        );
-        
-        // Buttons
-        styleButton(betButton);
-        styleButton(clearBetButton);
-        betButton.setPrefWidth(140);
-        clearBetButton.setPrefWidth(140);
-        
-        VBox betActionButtons = new VBox(8, betButton, clearBetButton);
-        betActionButtons.setAlignment(Pos.CENTER);
+        // === Betting Controls ===\n        bettingPanel.setOnBet(amount -> {\n            potAmount = amount;\n            potChipDisplay.getChildren().clear();\n            \n            if (potAmount > 0) {\n                // Create single large chip with bet amount\n                Label potChip = new Label(\"$\" + potAmount);\n                potChip.setAlignment(Pos.CENTER);\n                potChip.setMinSize(85, 85);\n                potChip.setMaxSize(85, 85);\n                potChip.setStyle(\n                    \"-fx-font-size: 20px; \" +\n                    \"-fx-font-weight: bold; \" +\n                    \"-fx-background-color: #FFD700; \" +\n                    \"-fx-text-fill: #000000; \" +\n                    \"-fx-background-radius: 50%; \" +\n                    \"-fx-border-color: #CC9900; \" +\n                    \"-fx-border-width: 3px; \" +\n                    \"-fx-border-radius: 50%; \" +\n                    \"-fx-effect: dropshadow(three-pass-box, rgba(255,215,0,0.8), 10, 0, 0, 0);\"\n                );\n                potChipDisplay.getChildren().add(potChip);\n            }\n            \n            potAmountLabel.setText(\"$\" + potAmount);\n            bettingPanel.clearBet();\n            \n            if (onBet != null) {\n                onBet.accept(amount);\n            }\n        });
         
         // Left panel container
-        VBox leftPanel = new VBox(15, 
-            betLabel, 
-            selectLabel,
-            chipButtons, 
-            currentBetLabel, 
-            betActionButtons
-        );
+        VBox leftPanel = new VBox(15, bettingPanel);
         leftPanel.setAlignment(Pos.TOP_CENTER);
         leftPanel.setStyle(
             "-fx-background-color: rgba(0,0,0,0.3); " +
@@ -130,9 +71,9 @@ public class DealerTableView extends BorderPane {
 
         // Game Area ===
         // Dealer area
-        dealerLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: 'Arial';");
+        dealerLabel.setStyle(StyleConstants.TITLE_TEXT);
         dealerCardsBox.setAlignment(Pos.CENTER);
-        dealerTotalLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: white; -fx-font-family: 'Arial';");
+        dealerTotalLabel.setStyle(StyleConstants.BODY_TEXT);
         VBox dealerBox = new VBox(10, dealerLabel, dealerCardsBox, dealerTotalLabel);
         dealerBox.setAlignment(Pos.CENTER);
         dealerBox.setPadding(new Insets(15));
@@ -181,41 +122,9 @@ public class DealerTableView extends BorderPane {
         potBox.setPadding(new Insets(5));
         
         // New Round button 
-        styleButton(newRoundButton);
+        StyleConstants.styleButton(newRoundButton);
         newRoundButton.setPrefWidth(140);
-        newRoundButton.setStyle(
-            "-fx-font-size: 15px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: #FFD700; " +
-            "-fx-text-fill: #2d5016; " +
-            "-fx-padding: 12 20 12 20; " +
-            "-fx-background-radius: 5; " +
-            "-fx-cursor: hand; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
-        );
         newRoundButton.setVisible(false);
-        
-        newRoundButton.setOnMouseEntered(e -> newRoundButton.setStyle(
-            "-fx-font-size: 15px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: #FFF700; " +
-            "-fx-text-fill: #2d5016; " +
-            "-fx-padding: 12 20 12 20; " +
-            "-fx-background-radius: 5; " +
-            "-fx-cursor: hand; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(255,215,0,0.7), 8, 0, 3, 3);"
-        ));
-        
-        newRoundButton.setOnMouseExited(e -> newRoundButton.setStyle(
-            "-fx-font-size: 15px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: #FFD700; " +
-            "-fx-text-fill: #2d5016; " +
-            "-fx-padding: 12 20 12 20; " +
-            "-fx-background-radius: 5; " +
-            "-fx-cursor: hand; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
-        ));
         
         // New Round button area 
         VBox newRoundBox = new VBox(newRoundButton);
@@ -223,16 +132,16 @@ public class DealerTableView extends BorderPane {
         newRoundBox.setPadding(new Insets(5, 0, 0, 0));
 
         // Player area
-        playerLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: 'Arial';");
+        playerLabel.setStyle(StyleConstants.TITLE_TEXT);
         playerCardsBox.setAlignment(Pos.CENTER);
-        playerTotalLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: white; -fx-font-family: 'Arial';");
+        playerTotalLabel.setStyle(StyleConstants.BODY_TEXT);
         VBox playerBox = new VBox(8, playerLabel, playerCardsBox, playerTotalLabel);
         playerBox.setAlignment(Pos.CENTER);
         playerBox.setPadding(new Insets(8));
 
         // Game action buttons
-        styleButton(hitButton);
-        styleButton(standButton);
+        StyleConstants.styleButton(hitButton);
+        StyleConstants.styleButton(standButton);
         hitButton.setPrefWidth(120);
         standButton.setPrefWidth(120);
         
@@ -350,40 +259,8 @@ public class DealerTableView extends BorderPane {
         separator3.setMaxWidth(160);
         
         // Back to Menu button
-        styleButton(backToMenuButton);
+        StyleConstants.styleDangerButton(backToMenuButton);
         backToMenuButton.setPrefWidth(160);
-        backToMenuButton.setStyle(
-            "-fx-font-size: 14px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: #8B0000; " +
-            "-fx-text-fill: white; " +
-            "-fx-padding: 10 15 10 15; " +
-            "-fx-background-radius: 5; " +
-            "-fx-cursor: hand; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
-        );
-        
-        backToMenuButton.setOnMouseEntered(e -> backToMenuButton.setStyle(
-            "-fx-font-size: 14px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: #A52A2A; " +
-            "-fx-text-fill: white; " +
-            "-fx-padding: 10 15 10 15; " +
-            "-fx-background-radius: 5; " +
-            "-fx-cursor: hand; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(139,0,0,0.7), 8, 0, 3, 3);"
-        ));
-        
-        backToMenuButton.setOnMouseExited(e -> backToMenuButton.setStyle(
-            "-fx-font-size: 14px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: #8B0000; " +
-            "-fx-text-fill: white; " +
-            "-fx-padding: 10 15 10 15; " +
-            "-fx-background-radius: 5; " +
-            "-fx-cursor: hand; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
-        ));
         
         Region separator4 = new Region();
         separator4.setStyle("-fx-background-color: rgba(255,255,255,0.3); -fx-pref-height: 2;");
@@ -408,18 +285,6 @@ public class DealerTableView extends BorderPane {
         // Button actions
         hitButton.setDisable(true);
         standButton.setDisable(true);
-
-        betButton.setOnAction(e -> {
-            if (currentBetAmount > 0) {
-                int betAmount = currentBetAmount;
-                placeBetInPot(betAmount);
-                onBet.accept(betAmount);
-            } else {
-                showMessage("Please select chips to bet.");
-            }
-        });
-        
-        clearBetButton.setOnAction(e -> clearBet());
 
         hitButton.setOnAction(e -> onHit.run());
         standButton.setOnAction(e -> onStand.run());
@@ -459,13 +324,13 @@ public class DealerTableView extends BorderPane {
         dealerCardsBox.getChildren().clear();
         for (CardInPlay cip : game.getDealerHand().cards()) {
             if (cip.isVisible()) {
-                dealerCardsBox.getChildren().add(createCardSymbol(
+                dealerCardsBox.getChildren().add(CardVisuals.createLargeCardSymbol(
                     cip.card().suit().symbol(),
                     cip.card().rank().symbol(),
                     cip.card().suit().isRed() ? "red" : "black"
                 ));
             } else {
-                dealerCardsBox.getChildren().add(createHiddenCard());
+                dealerCardsBox.getChildren().add(CardVisuals.createLargeHiddenCard());
             }
         }
         dealerTotalLabel.setText("Dealer total: " + game.getDealerTotalVisible());
@@ -473,7 +338,7 @@ public class DealerTableView extends BorderPane {
         // player cards - visual representation
         playerCardsBox.getChildren().clear();
         for (CardInPlay cip : game.getPlayerHand().cards()) {
-            playerCardsBox.getChildren().add(createCardSymbol(
+            playerCardsBox.getChildren().add(CardVisuals.createLargeCardSymbol(
                 cip.card().suit().symbol(),
                 cip.card().rank().symbol(),
                 cip.card().suit().isRed() ? "red" : "black"
@@ -485,8 +350,7 @@ public class DealerTableView extends BorderPane {
         betInfoLabel.setText("In Play:\n$" + game.getCurrentBet());
 
         if (game.isGameOver()) {
-            betButton.setDisable(true);
-            clearBetButton.setDisable(true);
+            bettingPanel.setButtonsEnabled(false);
             hitButton.setDisable(true);
             standButton.setDisable(true);
             statusLabel.setText("Game over: no funds left.");
@@ -498,8 +362,7 @@ public class DealerTableView extends BorderPane {
         if (!game.isRoundInProgress()) {
             hitButton.setDisable(true);
             standButton.setDisable(true);
-            betButton.setDisable(false);
-            clearBetButton.setDisable(false);
+            bettingPanel.setButtonsEnabled(true);
 
             GameResult res = game.getLastResult();
             switch (res) {
@@ -551,8 +414,7 @@ public class DealerTableView extends BorderPane {
                 }
             }
         } else {
-            betButton.setDisable(true);
-            clearBetButton.setDisable(true);
+            bettingPanel.setButtonsEnabled(false);
             hitButton.setDisable(!game.isPlayerTurn());
             standButton.setDisable(!game.isPlayerTurn());
             statusLabel.setText("Your turn: Hit or Stand.");
@@ -560,247 +422,12 @@ public class DealerTableView extends BorderPane {
         }
 
         // allow new bets only when no round in progress
-        betButton.setDisable(game.isRoundInProgress());
-        clearBetButton.setDisable(game.isRoundInProgress());
+        bettingPanel.setButtonsEnabled(!game.isRoundInProgress());
     }
 
-    /**
-     * Creates a visual card representation
-     */
-    private VBox createCardSymbol(String symbol, String value, String color) {
-        Label valueLabel = new Label(value);
-        valueLabel.setStyle(
-            "-fx-font-size: 24px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-text-fill: " + color + ";"
-        );
-        valueLabel.setAlignment(Pos.CENTER);
-        
-        Label symbolLabel = new Label(symbol);
-        symbolLabel.setStyle(
-            "-fx-font-size: 40px; " +
-            "-fx-text-fill: " + color + ";"
-        );
-        symbolLabel.setAlignment(Pos.CENTER);
-        
-        VBox cardContent = new VBox(3, valueLabel, symbolLabel);
-        cardContent.setAlignment(Pos.CENTER);
-        cardContent.setStyle(
-            "-fx-border-color: #333333; " +
-            "-fx-border-width: 3px; " +
-            "-fx-border-radius: 8; " +
-            "-fx-background-color: white; " +
-            "-fx-background-radius: 8; " +
-            "-fx-padding: 12 20 12 20; " +
-            "-fx-min-width: 75px; " +
-            "-fx-min-height: 110px; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
-        );
-        
-        return cardContent;
-    }
-
-    /**
-     * Creates a hidden card
-     */
-    private VBox createHiddenCard() {
-        Label hiddenLabel = new Label("?");
-        hiddenLabel.setStyle(
-            "-fx-font-size: 32px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-text-fill: white;"
-        );
-        hiddenLabel.setAlignment(Pos.CENTER);
-        
-        VBox cardContent = new VBox(hiddenLabel);
-        cardContent.setAlignment(Pos.CENTER);
-        cardContent.setStyle(
-            "-fx-border-color: #333333; " +
-            "-fx-border-width: 3px; " +
-            "-fx-border-radius: 8; " +
-            "-fx-background-color: #4169E1; " +
-            "-fx-background-radius: 8; " +
-            "-fx-padding: 12 20 12 20; " +
-            "-fx-min-width: 75px; " +
-            "-fx-min-height: 110px; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
-        );
-        
-        return cardContent;
-    }
-
-    /**
-     * Creates a circular chip button with value
-     */
-    private Button createChipButton(int value, String bgColor, String textColor) {
-        // Adjust font size based on value length for better visibility
-        String fontSize = value >= 100 ? "11px" : "13px";
-        String fontSizeHover = value >= 100 ? "12px" : "14px";
-        
-        Button chip = new Button("$" + value);
-        chip.setStyle(
-            "-fx-font-size: " + fontSize + "; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: " + bgColor + "; " +
-            "-fx-text-fill: " + textColor + "; " +
-            "-fx-padding: 15; " +
-            "-fx-background-radius: 50%; " +
-            "-fx-min-width: 65px; " +
-            "-fx-min-height: 65px; " +
-            "-fx-max-width: 65px; " +
-            "-fx-max-height: 65px; " +
-            "-fx-cursor: hand; " +
-            "-fx-border-color: #FFD700; " +
-            "-fx-border-width: 2px; " +
-            "-fx-border-radius: 50%; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 6, 0, 2, 2);"
-        );
-        
-        chip.setOnMouseEntered(e -> chip.setStyle(
-            "-fx-font-size: " + fontSizeHover + "; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: " + bgColor + "; " +
-            "-fx-text-fill: " + textColor + "; " +
-            "-fx-padding: 15; " +
-            "-fx-background-radius: 50%; " +
-            "-fx-min-width: 65px; " +
-            "-fx-min-height: 65px; " +
-            "-fx-max-width: 65px; " +
-            "-fx-max-height: 65px; " +
-            "-fx-cursor: hand; " +
-            "-fx-border-color: #FFD700; " +
-            "-fx-border-width: 3px; " +
-            "-fx-border-radius: 50%; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(255,215,0,0.7), 10, 0, 0, 0);"
-        ));
-        
-        chip.setOnMouseExited(e -> chip.setStyle(
-            "-fx-font-size: " + fontSize + "; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: " + bgColor + "; " +
-            "-fx-text-fill: " + textColor + "; " +
-            "-fx-padding: 15; " +
-            "-fx-background-radius: 50%; " +
-            "-fx-min-width: 65px; " +
-            "-fx-min-height: 65px; " +
-            "-fx-max-width: 65px; " +
-            "-fx-max-height: 65px; " +
-            "-fx-cursor: hand; " +
-            "-fx-border-color: #FFD700; " +
-            "-fx-border-width: 2px; " +
-            "-fx-border-radius: 50%; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 6, 0, 2, 2);"
-        ));
-        
-        return chip;
-    }
-    
-    /**
-     * Creates a display chip
-     */
-    private Label createDisplayChip(int value, String bgColor, String textColor) {
-        Label chip = new Label("$" + value);
-        chip.setStyle(
-            "-fx-font-size: 10px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: " + bgColor + "; " +
-            "-fx-text-fill: " + textColor + "; " +
-            "-fx-padding: 10; " +
-            "-fx-background-radius: 50%; " +
-            "-fx-min-width: 45px; " +
-            "-fx-min-height: 45px; " +
-            "-fx-max-width: 45px; " +
-            "-fx-max-height: 45px; " +
-            "-fx-alignment: center; " +
-            "-fx-border-color: #FFD700; " +
-            "-fx-border-width: 2px; " +
-            "-fx-border-radius: 50%; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 4, 0, 1, 1);"
-        );
-        return chip;
-    }
-    
-   
-    private void addToBet(int amount) {
-        currentBetAmount += amount;
-        currentBetLabel.setText("Current Bet: $" + currentBetAmount);
-    }
-    
-    
-    private void clearBet() {
-        currentBetAmount = 0;
-        currentBetLabel.setText("Current Bet: $0");
-    }
-    
-    /**
-     * Places bet into the pot 
-     */
-    private void placeBetInPot(int amount) {
-        potAmount = amount;
-        potChipDisplay.getChildren().clear();
-        
-        if (potAmount > 0) {
-            // Create single large chip with bet amount
-            Label potChip = new Label("$" + potAmount);
-            potChip.setAlignment(Pos.CENTER);
-            potChip.setMinSize(85, 85);
-            potChip.setMaxSize(85, 85);
-            potChip.setStyle(
-                "-fx-font-size: 20px; " +
-                "-fx-font-weight: bold; " +
-                "-fx-background-color: #FFD700; " +
-                "-fx-text-fill: #000000; " +
-                "-fx-background-radius: 50%; " +
-                "-fx-border-color: #CC9900; " +
-                "-fx-border-width: 3px; " +
-                "-fx-border-radius: 50%; " +
-                "-fx-effect: dropshadow(three-pass-box, rgba(255,215,0,0.8), 10, 0, 0, 0);"
-            );
-            potChipDisplay.getChildren().add(potChip);
-        }
-        
-        potAmountLabel.setText("$" + potAmount);
-        clearBet();
-    }
-  
     private void clearPot() {
         potAmount = 0;
         potChipDisplay.getChildren().clear();
         potAmountLabel.setText("$0");
-    }
-    
-    private void styleButton(Button button) {
-        button.setStyle(
-            "-fx-font-size: 14px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: white; " +
-            "-fx-text-fill: #2d5016; " +
-            "-fx-padding: 8 20 8 20; " +
-            "-fx-background-radius: 5; " +
-            "-fx-cursor: hand; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
-        );
-        
-        button.setOnMouseEntered(e -> button.setStyle(
-            "-fx-font-size: 14px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: lightgray; " +
-            "-fx-text-fill: #2d5016; " +
-            "-fx-padding: 8 20 8 20; " +
-            "-fx-background-radius: 5; " +
-            "-fx-cursor: hand; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 8, 0, 3, 3);"
-        ));
-        
-        button.setOnMouseExited(e -> button.setStyle(
-            "-fx-font-size: 14px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-color: white; " +
-            "-fx-text-fill: #2d5016; " +
-            "-fx-padding: 8 20 8 20; " +
-            "-fx-background-radius: 5; " +
-            "-fx-cursor: hand; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
-        ));
     }
 }

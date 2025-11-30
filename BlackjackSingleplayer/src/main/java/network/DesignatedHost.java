@@ -136,7 +136,7 @@ public class DesignatedHost {
     public void registerClient(ClientPeer client) {
         connectedClients.add(client);
         
-        // Add player to game engine
+        // Add player to game engine (will be marked as spectator if round in progress)
         gameEngine.addPlayer(client.getUserId(), 10000);
         
         // Send existing players list to the new client
@@ -151,6 +151,14 @@ public class DesignatedHost {
             GameUpdateMessage.MessageType.PLAYERS_LIST,
             existingPlayers
         ));
+        
+        // If player joined mid-round, notify them they're spectating
+        if (gameEngine.isSpectator(client.getUserId())) {
+            client.receiveGameUpdate(new GameUpdateMessage(
+                GameUpdateMessage.MessageType.SPECTATOR_MODE,
+                "You joined mid-game. You'll play in the next round."
+            ));
+        }
         
         // Notify API of player join
         if (gameCode != null && apiClient != null) {
@@ -168,8 +176,12 @@ public class DesignatedHost {
      * Unregister a client peer connection
      */
     public void unregisterClient(ClientPeer client) {
+        String playerId = client.getUserId();
+        boolean wasInRound = gameEngine.isRoundInProgress();
+        String currentPlayerBefore = gameEngine.getCurrentPlayer();
+        
         connectedClients.remove(client);
-        gameEngine.removePlayer(client.getUserId());
+        gameEngine.removePlayer(playerId);
         
         // Notify API of player leave
         if (gameCode != null && apiClient != null) {
@@ -178,8 +190,23 @@ public class DesignatedHost {
         
         broadcast(new GameUpdateMessage(
             GameUpdateMessage.MessageType.PLAYER_LEFT,
-            client.getUserId()
+            playerId
         ));
+        
+        // If player left during their turn, broadcast turn change
+        if (wasInRound && playerId.equals(currentPlayerBefore)) {
+            String newCurrentPlayer = gameEngine.getCurrentPlayer();
+            broadcast(new GameUpdateMessage(
+                GameUpdateMessage.MessageType.TURN_CHANGED,
+                newCurrentPlayer
+            ));
+            System.out.println("[HOST] Player left during their turn, advancing to next player");
+            
+            // Check if all remaining players have finished
+            if (gameEngine.allPlayersFinished()) {
+                playDealerTurn();
+            }
+        }
     }
     
     /**

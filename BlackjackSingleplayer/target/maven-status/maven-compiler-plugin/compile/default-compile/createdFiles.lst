@@ -1,5 +1,6 @@
 model\BetAmount.class
 model\Balance.class
+util\CardVisuals.class
 controller\GameLobbyController.class
 network\GameUpdateMessage$MessageType.class
 model\Deck.class
@@ -17,6 +18,7 @@ model\Rank.class
 network\BlackjackPeer$1.class
 command\HitCommand.class
 network\GameUpdateMessage.class
+view\components\ChipBettingPanel.class
 network\ApiClient.class
 view\MultiplayerTableView$PlayerPanel.class
 model\GameResult.class
@@ -29,16 +31,19 @@ controller\TutorialController.class
 network\ApiConfig.class
 model\GameEngine.class
 observer\TutorialObserver.class
+view\components\DealerPanel.class
 observer\MenuSubject.class
 controller\MultiplayerTableController.class
 controller\MultiplayerTableController$1.class
 view\DealerTableView$1.class
+util\StyleConstants.class
 model\CardTotal.class
 network\ApiClient$GameInfo.class
 view\TutorialView.class
 model\CardInPlay.class
 model\Hand.class
 observer\CloseAppObserver.class
+view\components\PlayerPanel.class
 command\SetBetCommand.class
 controller\DealerTableController.class
 network\ClientPeer.class

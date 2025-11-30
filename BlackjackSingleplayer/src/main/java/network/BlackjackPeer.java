@@ -7,7 +7,7 @@ import java.util.*;
  * BlackjackPeer extends ClientPeer with local game state caching
  * Maintains a local copy of game state for UI rendering
  * 
- * @author Javier Vargas, Group 12
+ * @author Group 12
  */
 public class BlackjackPeer extends ClientPeer {
     private Object localGameState;
@@ -17,6 +17,7 @@ public class BlackjackPeer extends ClientPeer {
     private Map<String, String> playerDisplayNames; // Map userId to displayName
     private List<Card> dealerHand;
     private String currentTurnPlayer; // Track whose turn it is
+    private boolean isSpectating; // Track if this player is spectating
     
     public BlackjackPeer(String userId) {
         super(userId);
@@ -26,6 +27,7 @@ public class BlackjackPeer extends ClientPeer {
         this.playerDisplayNames = new HashMap<>();
         this.dealerHand = new ArrayList<>();
         this.currentTurnPlayer = null;
+        this.isSpectating = false;
         
         // Register listener to update local state
         addUpdateListener(this::updateLocalState);
@@ -96,6 +98,8 @@ public class BlackjackPeer extends ClientPeer {
                     playerHands.get(playerId).clear();
                 }
                 dealerHand.clear();
+                // No longer spectating once new round starts
+                isSpectating = false;
                 break;
                 
             case DEALER_TURN:
@@ -109,6 +113,11 @@ public class BlackjackPeer extends ClientPeer {
             case TURN_CHANGED:
                 // Update whose turn it is
                 currentTurnPlayer = (String) message.getData(); // Can be null if all players finished
+                break;
+                
+            case SPECTATOR_MODE:
+                // Player joined mid-game, mark as spectating
+                isSpectating = true;
                 break;
                 
             default:
@@ -185,5 +194,9 @@ public class BlackjackPeer extends ClientPeer {
     
     public Map<String, Integer> getPlayerBets() {
         return new HashMap<>(playerBets);
+    }
+    
+    public boolean isSpectating() {
+        return isSpectating;
     }
 }

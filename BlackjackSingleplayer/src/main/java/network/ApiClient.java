@@ -15,7 +15,7 @@ import java.util.List;
  * HTTP client for matchmaking API
  * Handles game registration and discovery
  * 
- * @author COP4331 Team
+ * @author Group 12
  */
 public class ApiClient {
     private final String apiUrl;

@@ -6,7 +6,7 @@ import java.util.*;
  * Multi-player game engine that manages game state for all players
  * Handles deck, player hands, balances, and game logic
  * 
- * @author Javier Vargas, Group 12
+ * @author Group 12
  */
 public class GameEngine {
     private final Deck deck;
@@ -17,6 +17,7 @@ public class GameEngine {
     private final Set<String> standingPlayers;
     private final Set<String> bustedPlayers;
     private final List<String> playerOrder; // Track join order for turns
+    private final Set<String> spectators; // Players who joined mid-game
     
     private boolean roundInProgress;
     private int currentPlayerIndex; // Index in playerOrder for whose turn it is
@@ -30,6 +31,7 @@ public class GameEngine {
         this.standingPlayers = new HashSet<>();
         this.bustedPlayers = new HashSet<>();
         this.playerOrder = new ArrayList<>();
+        this.spectators = new HashSet<>();
         this.roundInProgress = false;
         this.currentPlayerIndex = 0;
     }
@@ -41,7 +43,14 @@ public class GameEngine {
         playerBalances.put(playerId, startingBalance);
         currentHands.put(playerId, new ArrayList<>());
         currentBets.put(playerId, 0);
-        playerOrder.add(playerId); // Track join order
+        
+        // If round is in progress, add as spectator
+        if (roundInProgress) {
+            spectators.add(playerId);
+            System.out.println("[GAME] Player " + playerId + " joined as spectator (round in progress)");
+        } else {
+            playerOrder.add(playerId); // Track join order
+        }
     }
     
     /**
@@ -52,7 +61,19 @@ public class GameEngine {
         currentHands.remove(playerId);
         currentBets.remove(playerId);
         standingPlayers.remove(playerId);
+        spectators.remove(playerId);
+        
+        // Remove from player order and adjust current turn if needed
+        int removedIndex = playerOrder.indexOf(playerId);
         playerOrder.remove(playerId);
+        
+        // If removed player was before or at current turn, adjust index
+        if (removedIndex >= 0 && removedIndex < currentPlayerIndex && roundInProgress) {
+            currentPlayerIndex--;
+            System.out.println("[GAME] Adjusted turn index after player removal");
+        }
+        // If removed player was the current player, the index now points to next player
+        // which is correct behavior
     }
     
     /**
@@ -102,6 +123,13 @@ public class GameEngine {
         standingPlayers.clear();
         bustedPlayers.clear();
         currentBets.replaceAll((k, v) -> 0); // Reset all bets to 0
+        
+        // Promote spectators to active players at start of new round
+        for (String spectator : spectators) {
+            playerOrder.add(spectator);
+            System.out.println("[GAME] Spectator " + spectator + " promoted to active player");
+        }
+        spectators.clear();
         
         // Mark round as in progress (betting phase)
         roundInProgress = true;
@@ -409,5 +437,19 @@ public class GameEngine {
      */
     public List<String> getPlayerOrder() {
         return new ArrayList<>(playerOrder);
+    }
+    
+    /**
+     * Check if a player is currently spectating
+     */
+    public boolean isSpectator(String playerId) {
+        return spectators.contains(playerId);
+    }
+    
+    /**
+     * Get all spectators
+     */
+    public Set<String> getSpectators() {
+        return new HashSet<>(spectators);
     }
 }

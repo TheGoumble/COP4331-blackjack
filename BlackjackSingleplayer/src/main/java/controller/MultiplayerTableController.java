@@ -201,6 +201,12 @@ public class MultiplayerTableController {
                     peer.requestGameState();
                     updateUI();
                     break;
+                    
+                case SPECTATOR_MODE:
+                    view.showMessage("⏸️ You joined mid-game. You'll play in the next round!");
+                    view.setTurnIndicator("SPECTATING - Waiting for next round...");
+                    updateUI();
+                    break;
 
                 case GAME_STATE_UPDATE:
                     updateUI();
@@ -254,10 +260,20 @@ public class MultiplayerTableController {
         // Update my balance
         view.updateMyBalance(peer.getMyBalance());
 
+        // Check if spectating
+        boolean isSpectating = peer.isSpectating();
+        
         // Update button states based on game phase and turn
         List<Card> dealerCards = peer.getDealerHand();
         boolean cardsDealt = !dealerCards.isEmpty();
         boolean isMyTurn = peer.isMyTurn();
+        
+        // Spectators cannot interact with the game
+        if (isSpectating) {
+            view.setButtonsEnabled(false, false, false, false);
+            view.setTurnIndicator("⏸️ SPECTATING - You'll play in the next round");
+            return;
+        }
         
         // Can bet during round but before cards are dealt
         boolean canBet = roundInProgress && !cardsDealt;
