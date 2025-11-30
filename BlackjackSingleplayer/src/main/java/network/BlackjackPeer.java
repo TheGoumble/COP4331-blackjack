@@ -13,6 +13,7 @@ public class BlackjackPeer extends ClientPeer {
     private Object localGameState;
     private Map<String, List<Card>> playerHands;
     private Map<String, Integer> playerBalances;
+    private Map<String, Integer> playerBets;
     private Map<String, String> playerDisplayNames; // Map userId to displayName
     private List<Card> dealerHand;
     private String currentTurnPlayer; // Track whose turn it is
@@ -21,6 +22,7 @@ public class BlackjackPeer extends ClientPeer {
         super(userId);
         this.playerHands = new HashMap<>();
         this.playerBalances = new HashMap<>();
+        this.playerBets = new HashMap<>();
         this.playerDisplayNames = new HashMap<>();
         this.dealerHand = new ArrayList<>();
         this.currentTurnPlayer = null;
@@ -126,6 +128,9 @@ public class BlackjackPeer extends ClientPeer {
         if (state.containsKey("playerBalances")) {
             this.playerBalances = (Map<String, Integer>) state.get("playerBalances");
         }
+        if (state.containsKey("playerBets")) {
+            this.playerBets = (Map<String, Integer>) state.get("playerBets");
+        }
         if (state.containsKey("dealerHand")) {
             this.dealerHand = (List<Card>) state.get("dealerHand");
         }
@@ -176,5 +181,9 @@ public class BlackjackPeer extends ClientPeer {
     
     public boolean isMyTurn() {
         return currentTurnPlayer != null && currentTurnPlayer.equals(getUserId());
+    }
+    
+    public Map<String, Integer> getPlayerBets() {
+        return new HashMap<>(playerBets);
     }
 }

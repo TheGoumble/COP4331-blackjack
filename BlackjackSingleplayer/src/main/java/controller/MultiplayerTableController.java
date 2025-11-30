@@ -73,6 +73,21 @@ public class MultiplayerTableController {
 
     private void handleBet(int amount) {
         try {
+            // Check if cards have been dealt (betting phase only)
+            List<Card> dealerCards = peer.getDealerHand();
+            if (!dealerCards.isEmpty()) {
+                view.showMessage("Cannot bet after cards are dealt!");
+                return;
+            }
+            
+            // Check if this player has already bet
+            Map<String, Integer> playerBets = peer.getPlayerBets();
+            int currentBet = playerBets.getOrDefault(peer.getUserId(), 0);
+            if (currentBet > 0) {
+                view.showMessage("You have already placed your bet ($" + currentBet + ")!");
+                return;
+            }
+            
             SetBetCommand cmd = new SetBetCommand(peer.getUserId(), amount);
             peer.sendCommand(cmd);
             view.showMessage("Bet placed: $" + amount);
@@ -140,8 +155,8 @@ public class MultiplayerTableController {
 
                 case ROUND_STARTED:
                     roundInProgress = true;
-                    view.showMessage("Round started! Place your bets and make your moves.");
-                    view.setTurnIndicator("BETTING PHASE - Place your bets!");
+                    view.showMessage("Round started! Place your bets.");
+                    view.setTurnIndicator("BETTING PHASE - All players place bets!");
                     peer.requestGameState();
                     updateUI();
                     break;
@@ -215,11 +230,13 @@ public class MultiplayerTableController {
         // Update all players
         Map<String, List<Card>> playerHands = peer.getPlayerHands();
         Map<String, Integer> playerBalances = peer.getPlayerBalances();
+        Map<String, Integer> playerBets = peer.getPlayerBets();
         Map<String, String> playerDisplayNames = peer.getPlayerDisplayNames();
 
         for (String playerId : playerHands.keySet()) {
             List<Card> hand = playerHands.get(playerId);
             int balance = playerBalances.getOrDefault(playerId, 0);
+            int betAmount = playerBets.getOrDefault(playerId, 0);
             boolean isActive = playerId.equals(peer.getUserId()) && roundInProgress;
             
             // Use display name - show "You" for current player, otherwise use their display name
@@ -231,16 +248,25 @@ public class MultiplayerTableController {
                 displayName = playerDisplayNames.getOrDefault(playerId, playerId);
             }
             view.updatePlayer(playerId, displayName, hand, balance, isActive);
+            view.updatePlayerBet(playerId, betAmount);
         }
 
         // Update my balance
         view.updateMyBalance(peer.getMyBalance());
 
         // Update button states based on game phase and turn
-        boolean canBet = !roundInProgress;
+        List<Card> dealerCards = peer.getDealerHand();
+        boolean cardsDealt = !dealerCards.isEmpty();
         boolean isMyTurn = peer.isMyTurn();
-        boolean canHit = roundInProgress && isMyTurn;
-        boolean canStand = roundInProgress && isMyTurn;
+        
+        // Can bet during round but before cards are dealt
+        boolean canBet = roundInProgress && !cardsDealt;
+        
+        // Can hit/stand only after cards dealt and during player's turn
+        boolean canHit = roundInProgress && cardsDealt && isMyTurn;
+        boolean canStand = roundInProgress && cardsDealt && isMyTurn;
+        
+        // Can start round when not in progress
         boolean canStartRound = isHost && !roundInProgress;
 
         view.setButtonsEnabled(canBet, canHit, canStand, canStartRound);
@@ -252,8 +278,11 @@ public class MultiplayerTableController {
             } else {
                 view.setTurnIndicator("Waiting for host to start round");
             }
+        } else if (!cardsDealt) {
+            // Betting phase
+            view.setTurnIndicator("BETTING PHASE - All players place bets!");
         } else {
-            // Show whose turn it is
+            // Playing phase - show whose turn it is
             String currentTurnPlayer = peer.getCurrentTurnPlayer();
             if (currentTurnPlayer == null) {
                 view.setTurnIndicator("All players finished - Waiting for dealer");

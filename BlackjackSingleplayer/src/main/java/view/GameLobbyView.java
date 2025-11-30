@@ -5,6 +5,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -15,86 +16,86 @@ import java.util.function.Consumer;
  */
 public class GameLobbyView extends BorderPane {
 
-    private final Label titleLabel = new Label("Game Lobby");
-    private final ListView<String> gamesListView = new ListView<>();
+    private final Label titleLabel = new Label("Lobby");
+    private final FlowPane gamesGridPane = new FlowPane();
     private final TextField directConnectField = new TextField();
-    private final Button joinSelectedButton = new Button("Join Selected Game");
-    private final Button refreshButton = new Button("Refresh List");
-    private final Button directConnectButton = new Button("Direct Connect");
+    private final Button refreshButton = new Button("Refresh");
+    private final Button directConnectButton = new Button("Connect");
     private final Button backButton = new Button("Back to Menu");
-    private final Label statusLabel = new Label("Searching for games on local network...");
+    private final Label statusLabel = new Label("Loading available games...");
+    private final Map<String, VBox> gameCards = new HashMap<>();
     
     private Consumer<String> onJoinSession = sessionId -> {};
     private Runnable onRefresh = () -> {};
     private Runnable onBack = () -> {};
 
     public GameLobbyView() {
-        setStyle("-fx-background-color: #2d5016;");
+        setStyle("-fx-background-color: linear-gradient(to bottom, #1a3d0f, #2d5016);");
 
-        // Title
-        titleLabel.setStyle("-fx-font-size: 42px; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: 'Arial';");
+        // Title section with refresh button
+        titleLabel.setStyle(
+            "-fx-font-size: 36px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-text-fill: white; " +
+            "-fx-font-family: 'Arial'; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 6, 0, 0, 2);"
+        );
         
-        VBox topSection = new VBox(10, titleLabel);
+        styleButton(refreshButton, "#2d5016");
+        refreshButton.setPrefWidth(120);
+        
+        HBox titleBox = new HBox(15, titleLabel, refreshButton);
+        titleBox.setAlignment(Pos.CENTER);
+        
+        VBox topSection = new VBox(10, titleBox, statusLabel);
         topSection.setAlignment(Pos.CENTER);
-        topSection.setPadding(new Insets(30, 0, 20, 0));
+        topSection.setPadding(new Insets(15, 0, 10, 0));
         setTop(topSection);
 
-        // Center - Active games list
+        // Center - Games grid
         VBox centerSection = createCenterSection();
         setCenter(centerSection);
 
-        // Bottom - Status and back button
+        // Bottom - Direct connect and back button
         VBox bottomSection = createBottomSection();
         setBottom(bottomSection);
 
         // Wire up actions
-        joinSelectedButton.setOnAction(e -> handleJoinSelected());
         refreshButton.setOnAction(e -> onRefresh.run());
         directConnectButton.setOnAction(e -> handleDirectConnect());
         backButton.setOnAction(e -> onBack.run());
-        
-        // Double-click to join
-        gamesListView.setOnMouseClicked(e -> {
-            if (e.getClickCount() == 2) {
-                handleJoinSelected();
-            }
-        });
     }
 
     private VBox createCenterSection() {
-        Label gamesLabel = new Label("Available Games on Local Network:");
-        gamesLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
-
-        gamesListView.setPrefHeight(250);
-        gamesListView.setStyle(
-            "-fx-background-color: white; " +
-            "-fx-border-color: #cccccc; " +
-            "-fx-border-width: 2px; " +
-            "-fx-border-radius: 8px; " +
-            "-fx-background-radius: 8px;"
+        Label gamesLabel = new Label("Available Games");
+        gamesLabel.setStyle(
+            "-fx-font-size: 20px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-text-fill: white; " +
+            "-fx-font-family: 'Arial'; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 4, 0, 0, 2);"
         );
 
-        HBox buttonsRow = new HBox(15, joinSelectedButton, refreshButton);
-        buttonsRow.setAlignment(Pos.CENTER);
-        buttonsRow.setPadding(new Insets(15, 0, 0, 0));
-
-        VBox contentBox = new VBox(15, gamesLabel, gamesListView, buttonsRow);
-        contentBox.setAlignment(Pos.CENTER);
-        contentBox.setPadding(new Insets(30, 40, 30, 40));
-        contentBox.setStyle(
-            "-fx-background-color: white; " +
-            "-fx-background-radius: 15; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 10, 0, 0, 5);"
+        // Games grid setup
+        gamesGridPane.setHgap(15);
+        gamesGridPane.setVgap(15);
+        gamesGridPane.setAlignment(Pos.CENTER);
+        gamesGridPane.setPadding(new Insets(15));
+        gamesGridPane.setPrefWrapLength(900); // Wrap after ~900px width
+        gamesGridPane.setStyle(
+            "-fx-background-color: rgba(0,0,0,0.3); " +
+            "-fx-background-radius: 12; " +
+            "-fx-padding: 18;"
         );
-        contentBox.setMaxWidth(700);
+
+        VBox contentBox = new VBox(12, gamesLabel, gamesGridPane);
+        contentBox.setAlignment(Pos.TOP_CENTER);
+        contentBox.setPadding(new Insets(10, 20, 10, 20));
         
-        VBox wrapper = new VBox(contentBox);
-        wrapper.setAlignment(Pos.CENTER);
-        wrapper.setPadding(new Insets(20));
-        
-        ScrollPane scrollPane = new ScrollPane(wrapper);
+        ScrollPane scrollPane = new ScrollPane(contentBox);
         scrollPane.setFitToWidth(true);
-        scrollPane.setStyle("-fx-background: #2d5016; -fx-background-color: #2d5016;");
+        scrollPane.setFitToHeight(true);
+        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         
@@ -104,130 +105,256 @@ public class GameLobbyView extends BorderPane {
     }
 
     private VBox createBottomSection() {
-        Label instructionLabel = new Label("Games are discovered via online matchmaking");
-        instructionLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: white; -fx-font-family: 'Arial'; -fx-font-style: italic;");
+        statusLabel.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-text-fill: #FFD700; " +
+            "-fx-font-family: 'Arial'; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 3, 0, 0, 1);"
+        );
 
-        statusLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #FFD700; -fx-font-family: 'Arial';");
-
-        // Direct connect section for internet play
-        Label orLabel = new Label("OR Enter Game Code / IP:Port");
-        orLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: 'Arial';");
+        // Direct connect section
+        Label orLabel = new Label("━━━━━  Direct Connect  ━━━━━");
+        orLabel.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-text-fill: white; " +
+            "-fx-font-family: 'Arial';"
+        );
         
-        directConnectField.setPromptText("Game Code (e.g., ABC123) or IP:Port (e.g., 203.0.113.5:54321)");
+        directConnectField.setPromptText("Game Code (ABC123) or IP:Port (192.168.1.5:54321)");
         directConnectField.setPrefWidth(400);
         directConnectField.setStyle(
+            "-fx-font-size: 13px; " +
             "-fx-background-color: white; " +
             "-fx-text-fill: black; " +
-            "-fx-prompt-text-fill: gray; " +
-            "-fx-border-color: #cccccc; " +
+            "-fx-prompt-text-fill: #888888; " +
+            "-fx-border-color: #FFD700; " +
             "-fx-border-width: 2px; " +
             "-fx-border-radius: 8px; " +
             "-fx-background-radius: 8px; " +
-            "-fx-padding: 8;"
+            "-fx-padding: 10;"
         );
+        
+        styleButton(directConnectButton, "#2d5016");
+        directConnectButton.setPrefWidth(110);
         
         HBox directConnectBox = new HBox(10, directConnectField, directConnectButton);
         directConnectBox.setAlignment(Pos.CENTER);
+        directConnectBox.setPadding(new Insets(8));
+        directConnectBox.setStyle(
+            "-fx-background-color: rgba(0,0,0,0.4); " +
+            "-fx-background-radius: 10; " +
+            "-fx-padding: 12;"
+        );
 
-        VBox box = new VBox(12, instructionLabel, statusLabel, orLabel, directConnectBox, backButton);
-        box.setAlignment(Pos.CENTER);
-        box.setPadding(new Insets(20, 20, 30, 20));
-
-        // Style buttons
-        styleButton(joinSelectedButton, "#2d5016");
-        styleButton(refreshButton, "#2d5016");
-        styleButton(directConnectButton, "#2d5016");
         styleButton(backButton, "#8B0000");
+        backButton.setPrefWidth(160);
+
+        VBox box = new VBox(10, orLabel, directConnectBox, backButton);
+        box.setAlignment(Pos.CENTER);
+        box.setPadding(new Insets(10, 20, 18, 20));
 
         return box;
     }
 
     private void styleButton(Button button, String color) {
-        button.setStyle(
-            "-fx-font-size: 15px; " +
+        String baseStyle = 
+            "-fx-font-size: 14px; " +
             "-fx-font-weight: bold; " +
             "-fx-background-color: " + color + "; " +
             "-fx-text-fill: white; " +
-            "-fx-padding: 10 25 10 25; " +
+            "-fx-padding: 10 20 10 20; " +
             "-fx-background-radius: 8; " +
             "-fx-cursor: hand; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 5, 0, 2, 2);";
+        
+        String hoverStyle = 
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: derive(" + color + ", 25%); " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 10 20 10 20; " +
+            "-fx-background-radius: 8; " +
+            "-fx-cursor: hand; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.7), 8, 0, 3, 3); " +
+            "-fx-scale-x: 1.03; " +
+            "-fx-scale-y: 1.03;";
+        
+        button.setStyle(baseStyle);
+        button.setOnMouseEntered(e -> button.setStyle(hoverStyle));
+        button.setOnMouseExited(e -> button.setStyle(baseStyle));
+    }
+    
+    private VBox createGameCard(String gameCode, String displayName) {
+        // Host name label
+        Label hostLabel = new Label(displayName);
+        hostLabel.setStyle(
+            "-fx-font-size: 16px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-text-fill: #2d5016; " +
+            "-fx-font-family: 'Arial';"
+        );
+        hostLabel.setWrapText(true);
+        hostLabel.setMaxWidth(200);
+        hostLabel.setAlignment(Pos.CENTER);
+        
+        // Game type icon/label
+        Label gameTypeLabel = new Label("Blackjack");
+        gameTypeLabel.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-text-fill: #8B0000; " +
+            "-fx-font-family: 'Arial';"
         );
         
-        button.setOnMouseEntered(e -> button.setStyle(
-            "-fx-font-size: 15px; " +
+        // Game code label
+        Label codeLabel = new Label("Code: " + gameCode);
+        codeLabel.setStyle(
+            "-fx-font-size: 13px; " +
             "-fx-font-weight: bold; " +
-            "-fx-background-color: derive(" + color + ", 20%); " +
+            "-fx-text-fill: #FFD700; " +
+            "-fx-font-family: 'Courier New'; " +
+            "-fx-background-color: #2d5016; " +
+            "-fx-background-radius: 5; " +
+            "-fx-padding: 5 10 5 10;"
+        );
+        
+        // Join button
+        Button joinButton = new Button("Join Game");
+        joinButton.setPrefWidth(160);
+        joinButton.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: #2d5016; " +
             "-fx-text-fill: white; " +
-            "-fx-padding: 10 25 10 25; " +
+            "-fx-padding: 9 18 9 18; " +
             "-fx-background-radius: 8; " +
             "-fx-cursor: hand; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 8, 0, 3, 3); " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 5, 0, 2, 2);"
+        );
+        
+        joinButton.setOnMouseEntered(e -> joinButton.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: derive(#2d5016, 30%); " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 9 18 9 18; " +
+            "-fx-background-radius: 8; " +
+            "-fx-cursor: hand; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 8, 0, 3, 3); " +
             "-fx-scale-x: 1.03; " +
             "-fx-scale-y: 1.03;"
         ));
         
-        button.setOnMouseExited(e -> button.setStyle(
-            "-fx-font-size: 15px; " +
+        joinButton.setOnMouseExited(e -> joinButton.setStyle(
+            "-fx-font-size: 14px; " +
             "-fx-font-weight: bold; " +
-            "-fx-background-color: " + color + "; " +
+            "-fx-background-color: #2d5016; " +
             "-fx-text-fill: white; " +
-            "-fx-padding: 10 25 10 25; " +
+            "-fx-padding: 9 18 9 18; " +
             "-fx-background-radius: 8; " +
             "-fx-cursor: hand; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 5, 0, 2, 2);"
         ));
+        
+        joinButton.setOnAction(e -> onJoinSession.accept(gameCode));
+        
+        // Card container
+        VBox card = new VBox(12, hostLabel, gameTypeLabel, codeLabel, joinButton);
+        card.setAlignment(Pos.CENTER);
+        card.setPadding(new Insets(16));
+        card.setPrefWidth(220);
+        card.setPrefHeight(180);
+        card.setStyle(
+            "-fx-background-color: white; " +
+            "-fx-background-radius: 12; " +
+            "-fx-border-color: #FFD700; " +
+            "-fx-border-width: 3; " +
+            "-fx-border-radius: 12; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 0, 4);"
+        );
+        
+        // Hover effect for card
+        card.setOnMouseEntered(e -> card.setStyle(
+            "-fx-background-color: #f9f9f9; " +
+            "-fx-background-radius: 12; " +
+            "-fx-border-color: #FFD700; " +
+            "-fx-border-width: 4; " +
+            "-fx-border-radius: 12; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(255,215,0,0.6), 12, 0, 0, 5); " +
+            "-fx-scale-x: 1.02; " +
+            "-fx-scale-y: 1.02;"
+        ));
+        
+        card.setOnMouseExited(e -> card.setStyle(
+            "-fx-background-color: white; " +
+            "-fx-background-radius: 12; " +
+            "-fx-border-color: #FFD700; " +
+            "-fx-border-width: 3; " +
+            "-fx-border-radius: 12; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 0, 4);"
+        ));
+        
+        return card;
     }
 
-    private void handleJoinSelected() {
-        String selected = gamesListView.getSelectionModel().getSelectedItem();
-        if (selected != null && !selected.equals("No games found - refresh to check for new games") && !selected.equals("Searching...")) {
-            // Extract connection string from display format
-            String connectionString = extractConnectionString(selected);
-            if (connectionString != null) {
-                onJoinSession.accept(connectionString);
-            }
-        } else {
-            setStatus("Please select a game from the list");
-        }
-    }
-    
     private void handleDirectConnect() {
         String address = directConnectField.getText().trim().toUpperCase();
         if (!address.isEmpty()) {
             onJoinSession.accept(address);
             directConnectField.clear();
         } else {
-            setStatus("Please enter game code or host address");
+            setStatus("Please enter a game code or host address");
         }
-    }
-    
-    private String extractConnectionString(String listItem) {
-        // Extract game code from format: "Name's Blackjack Game (Code: ABC123)"
-        if (listItem.contains("(Code: ") && listItem.contains(")")) {
-            int start = listItem.indexOf("(Code: ") + 7;
-            int end = listItem.indexOf(")", start);
-            if (end > start) {
-                return listItem.substring(start, end).trim();
-            }
-        }
-        return null;
     }
 
     /**
-     * Update the list of available games
+     * Update the grid of available games
      */
     public void updateGamesList(Map<String, String> games) {
-        gamesListView.getItems().clear();
+        gamesGridPane.getChildren().clear();
+        gameCards.clear();
         
         if (games.isEmpty()) {
-            gamesListView.getItems().add("No games found - refresh to check for new games");
-            setStatus("No games discovered yet. Make sure host has created a game.");
+            // Show "no games" message
+            Label noGamesLabel = new Label("No games available");
+            noGamesLabel.setStyle(
+                "-fx-font-size: 20px; " +
+                "-fx-font-weight: bold; " +
+                "-fx-text-fill: #FFD700; " +
+                "-fx-font-family: 'Arial';"
+            );
+            
+            Label instructionLabel = new Label("Create a game or refresh to check for new games");
+            instructionLabel.setStyle(
+                "-fx-font-size: 14px; " +
+                "-fx-text-fill: white; " +
+                "-fx-font-family: 'Arial';"
+            );
+            
+            VBox emptyBox = new VBox(10, noGamesLabel, instructionLabel);
+            emptyBox.setAlignment(Pos.CENTER);
+            emptyBox.setPadding(new Insets(50));
+            
+            gamesGridPane.getChildren().add(emptyBox);
+            setStatus("No games found - Click refresh to search again");
         } else {
             for (Map.Entry<String, String> entry : games.entrySet()) {
-                gamesListView.getItems().add(entry.getValue());
+                String gameCode = entry.getKey();
+                String displayText = entry.getValue();
+                
+                // Extract host name from format: "Name's Blackjack Game (Code: ABC123)"
+                String hostName = displayText;
+                if (displayText.contains("(Code:")) {
+                    hostName = displayText.substring(0, displayText.indexOf("(Code:")).trim();
+                }
+                
+                VBox gameCard = createGameCard(gameCode, hostName);
+                gameCards.put(gameCode, gameCard);
+                gamesGridPane.getChildren().add(gameCard);
             }
-            setStatus(games.size() + " game(s) available - double-click to join");
+            setStatus(games.size() + " game(s) available - Click a card to join");
         }
     }
 

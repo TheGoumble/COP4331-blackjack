@@ -56,11 +56,16 @@ public class GameEngine {
     }
     
     /**
-     * Process a bet from a player (only before round starts)
+     * Process a bet from a player (during betting phase)
      */
     public void processBet(String playerId, int amount) {
-        if (roundInProgress) {
-            throw new IllegalStateException("Cannot bet during active round");
+        if (!roundInProgress) {
+            throw new IllegalStateException("Round not started - host must start round first");
+        }
+        
+        // Check if cards have already been dealt
+        if (!dealerHand.isEmpty()) {
+            throw new IllegalStateException("Cannot bet after cards are dealt");
         }
         
         if (!playerBalances.containsKey(playerId)) {
@@ -82,20 +87,41 @@ public class GameEngine {
     }
     
     /**
-     * Start a new round after all bets are placed
+     * Start a new round - enables betting phase
      */
     public void startRound() {
         if (roundInProgress) {
             throw new IllegalStateException("Round already in progress");
         }
         
-        // Clear previous hands
+        // Clear previous hands and bets
         for (String playerId : currentHands.keySet()) {
             currentHands.get(playerId).clear();
         }
         dealerHand.clear();
         standingPlayers.clear();
         bustedPlayers.clear();
+        currentBets.replaceAll((k, v) -> 0); // Reset all bets to 0
+        
+        // Mark round as in progress (betting phase)
+        roundInProgress = true;
+        currentPlayerIndex = 0; // Start with first player in join order
+    }
+    
+    /**
+     * Deal cards after all players have placed their bets
+     */
+    public void dealCards() {
+        if (!roundInProgress) {
+            throw new IllegalStateException("No round in progress");
+        }
+        
+        // Check if all players have placed bets
+        for (String playerId : currentBets.keySet()) {
+            if (currentBets.get(playerId) == 0) {
+                throw new IllegalStateException("All players must place bets before dealing");
+            }
+        }
         
         // Shuffle deck
         deck.shuffle();
@@ -110,9 +136,6 @@ public class GameEngine {
             currentHands.get(playerId).add(deck.deal());
         }
         dealerHand.add(deck.deal());
-        
-        roundInProgress = true;
-        currentPlayerIndex = 0; // Start with first player in join order
         
         // Check for dealer blackjack (instant win for dealer)
         if (dealerHand.size() == 2 && calculateHandValue(dealerHand) == 21) {
@@ -316,6 +339,10 @@ public class GameEngine {
         return currentBets.getOrDefault(playerId, 0);
     }
     
+    public Map<String, Integer> getPlayerBets() {
+        return new HashMap<>(currentBets);
+    }
+    
     /**
      * Get the ID of the player whose turn it currently is
      * Returns null if no round in progress or all players finished
@@ -336,6 +363,21 @@ public class GameEngine {
     public boolean isPlayersTurn(String playerId) {
         String currentPlayer = getCurrentPlayer();
         return currentPlayer != null && currentPlayer.equals(playerId);
+    }
+    
+    /**
+     * Check if all players have placed their bets
+     */
+    public boolean allBetsPlaced() {
+        if (!roundInProgress) {
+            return false;
+        }
+        for (Integer bet : currentBets.values()) {
+            if (bet == 0) {
+                return false;
+            }
+        }
+        return true;
     }
     
     /**

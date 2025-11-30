@@ -250,9 +250,28 @@ public class DealerTableView extends BorderPane {
         
         VBox centerArea = new VBox(10, dealerBox, potBox, playerBox, gameActionButtons, statusLabel);
         centerArea.setAlignment(Pos.CENTER);
-        centerArea.setPadding(new Insets(5));
+        centerArea.setPadding(new Insets(20));
         
-        setCenter(centerArea);
+        // Create oval table background
+        StackPane tableArea = new StackPane();
+        tableArea.setStyle(
+            "-fx-background-color: #1a3d0f; " + // Darker green for table
+            "-fx-background-radius: 350px / 250px; " + // Creates oval shape (horizontal / vertical radius)
+            "-fx-border-color: #8B4513; " + // Brown wood border
+            "-fx-border-width: 10; " +
+            "-fx-border-radius: 350px / 250px; " +
+            "-fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 5);" // Inner shadow for depth
+        );
+        tableArea.setMinSize(900, 650);
+        tableArea.setMaxSize(900, 650);
+        tableArea.getChildren().add(centerArea);
+        
+        // Wrap table in container for centering
+        StackPane tableContainer = new StackPane(tableArea);
+        tableContainer.setAlignment(Pos.CENTER);
+        tableContainer.setPadding(new Insets(10));
+        
+        setCenter(tableContainer);
 
         //  Balence Info  
         Label infoLabel = new Label("GAME INFO");

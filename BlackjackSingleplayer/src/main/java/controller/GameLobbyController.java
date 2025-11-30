@@ -48,7 +48,7 @@ public class GameLobbyController {
         
         for (GameInfo game : games) {
             // Use actual display name from API
-            String display = String.format("%s's Blackjack Game (Code: %s)",
+            String display = String.format("%s (Code: %s)",
                 game.hostDisplayName,
                 game.gameCode
             );

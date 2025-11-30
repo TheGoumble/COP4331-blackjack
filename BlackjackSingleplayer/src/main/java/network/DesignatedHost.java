@@ -11,7 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Designated host that validates and executes commands
  * Acts as the authoritative server for the game
  * 
- * @author Javier Vargas, Group 12
+ * @author Javier Vargas, Luca Lombardo Group 12
  */
 public class DesignatedHost {
     private final GameEngine gameEngine;
@@ -201,6 +201,11 @@ public class DesignatedHost {
             // Broadcast update to all clients
             broadcast(new GameUpdateMessage(msgType, command.getPlayerId()));
             
+            // If this was a bet and all bets are now placed, deal cards
+            if (msgType == GameUpdateMessage.MessageType.BET_PLACED && gameEngine.allBetsPlaced()) {
+                dealCards();
+            }
+            
             // Broadcast updated game state so all clients see the changes
             broadcastGameState();
             
@@ -243,13 +248,29 @@ public class DesignatedHost {
     }
     
     /**
-     * Start a new round
+     * Start a new round - enables betting phase
      */
     public void startRound() {
         gameEngine.startRound();
         broadcast(new GameUpdateMessage(
             GameUpdateMessage.MessageType.ROUND_STARTED,
             null
+        ));
+        
+        // Broadcast initial game state (no cards yet, just show betting phase)
+        broadcastGameState();
+    }
+    
+    /**
+     * Deal cards after all bets are placed
+     */
+    private void dealCards() {
+        gameEngine.dealCards();
+        
+        // Broadcast that cards are being dealt
+        broadcast(new GameUpdateMessage(
+            GameUpdateMessage.MessageType.GAME_STATE_UPDATE,
+            "Cards dealt!"
         ));
         
         // Broadcast whose turn it is (first player)
@@ -259,7 +280,7 @@ public class DesignatedHost {
             firstPlayer
         ));
         
-        // Broadcast initial game state so all players see dealt cards
+        // Broadcast updated game state so all players see dealt cards
         broadcastGameState();
     }
     
@@ -273,12 +294,13 @@ public class DesignatedHost {
     }
     
     /**
-     * Broadcast current game state (hands, balances, dealer hand) to all clients
+     * Broadcast current game state (hands, balances, bets, dealer hand) to all clients
      */
     private void broadcastGameState() {
         Map<String, Object> state = new HashMap<>();
         state.put("playerHands", gameEngine.getCurrentHands());
         state.put("playerBalances", gameEngine.getPlayerBalances());
+        state.put("playerBets", gameEngine.getPlayerBets());
         state.put("dealerHand", gameEngine.getDealerHand());
         
         broadcast(new GameUpdateMessage(
