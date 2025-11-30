@@ -47,12 +47,19 @@ public class GameLobbyController {
         Map<String, String> displayGames = new LinkedHashMap<>();
         
         for (GameInfo game : games) {
-            // Use actual display name from API
-            String display = String.format("%s (Code: %s)",
+            // Include player count in display
+            String display = String.format("%s (%d/%d) - Code: %s",
                 game.hostDisplayName,
+                game.playerCount,
+                game.maxPlayers,
                 game.gameCode
             );
             displayGames.put(game.gameCode, display);
+            
+            // Debug log each game
+            System.out.println("[LOBBY]   Game: " + game.gameCode + 
+                             " - Host: " + game.hostDisplayName + 
+                             " - Players: " + game.playerCount + "/" + game.maxPlayers);
         }
         
         view.updateGamesList(displayGames);

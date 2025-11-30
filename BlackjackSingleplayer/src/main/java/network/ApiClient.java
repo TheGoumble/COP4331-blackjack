@@ -104,7 +104,9 @@ public class ApiClient {
                         game.has("hostDisplayName") ? game.get("hostDisplayName").getAsString() : game.get("hostId").getAsString(),
                         game.get("address").getAsString(),
                         game.get("port").getAsInt(),
-                        game.get("createdAt").getAsLong()
+                        game.get("createdAt").getAsLong(),
+                        game.get("playerCount").getAsInt(),
+                        game.get("maxPlayers").getAsInt()
                     ));
                 }
                 
@@ -145,7 +147,9 @@ public class ApiClient {
                     game.has("hostDisplayName") ? game.get("hostDisplayName").getAsString() : game.get("hostId").getAsString(),
                     game.get("address").getAsString(),
                     game.get("port").getAsInt(),
-                    0 // createdAt not included in single game response
+                    0, // createdAt not included in single game response
+                    game.get("playerCount").getAsInt(),
+                    game.get("maxPlayers").getAsInt()
                 );
             } else {
                 System.err.println("[API] Game not found: " + gameCode);
@@ -275,9 +279,11 @@ public class ApiClient {
         public final String address;
         public final int port;
         public final long createdAt;
+        public final int playerCount;
+        public final int maxPlayers;
         
         public GameInfo(String gameCode, String sessionId, String hostId, String hostDisplayName,
-                       String address, int port, long createdAt) {
+                       String address, int port, long createdAt, int playerCount, int maxPlayers) {
             this.gameCode = gameCode;
             this.sessionId = sessionId;
             this.hostId = hostId;
@@ -285,6 +291,8 @@ public class ApiClient {
             this.address = address;
             this.port = port;
             this.createdAt = createdAt;
+            this.playerCount = playerCount;
+            this.maxPlayers = maxPlayers;
         }
         
         public String getConnectionString() {

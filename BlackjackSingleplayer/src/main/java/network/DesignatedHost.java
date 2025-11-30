@@ -160,8 +160,8 @@ public class DesignatedHost {
             ));
         }
         
-        // Notify API of player join
-        if (gameCode != null && apiClient != null) {
+        // Notify API of player join (but NOT if this is the host connecting to themselves)
+        if (gameCode != null && apiClient != null && !client.getUserId().equals(hostId)) {
             apiClient.notifyPlayerJoin(gameCode);
         }
         
@@ -183,8 +183,8 @@ public class DesignatedHost {
         connectedClients.remove(client);
         gameEngine.removePlayer(playerId);
         
-        // Notify API of player leave
-        if (gameCode != null && apiClient != null) {
+        // Notify API of player leave (but NOT if this is the host disconnecting from themselves)
+        if (gameCode != null && apiClient != null && !playerId.equals(hostId)) {
             apiClient.notifyPlayerLeave(gameCode);
         }
         
