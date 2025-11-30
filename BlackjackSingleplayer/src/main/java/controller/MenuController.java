@@ -60,8 +60,12 @@ public class MenuController {
     }
 
     private void wireActions() {
-        view.createGameButton.setOnAction(e -> {
-            // For multiplayer, notify observers
+        // Handle dropdown menu items
+        view.singlePlayerItem.setOnAction(e -> {
+            router.showSinglePlayerTable();
+        });
+        
+        view.multiplayerItem.setOnAction(e -> {
             menuSubject.notifyMenuObserver("CREATE_GAME", currentUser.getUserId());
         });
 

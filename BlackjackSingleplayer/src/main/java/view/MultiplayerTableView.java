@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 public class MultiplayerTableView extends BorderPane {
 
     private final Label dealerLabel = new Label("Dealer");
-    private final TextArea dealerCardsArea = new TextArea();
+    private final HBox dealerCardsBox = new HBox(10);
     private final Label dealerTotalLabel = new Label("Total: 0");
 
     private final VBox playersBox = new VBox(10);
@@ -81,13 +81,12 @@ public class MultiplayerTableView extends BorderPane {
         dealerLabel.setFont(Font.font("Arial", FontWeight.BOLD, 18));
         dealerLabel.setTextFill(Color.WHITE);
 
-        dealerCardsArea.setEditable(false);
-        dealerCardsArea.setPrefHeight(60);
-        dealerCardsArea.setStyle("-fx-control-inner-background: #1a3d0a;");
+        dealerCardsBox.setAlignment(Pos.CENTER);
+        dealerCardsBox.setStyle("-fx-padding: 10;");
 
         dealerTotalLabel.setTextFill(Color.WHITE);
 
-        VBox box = new VBox(5, dealerLabel, dealerCardsArea, dealerTotalLabel);
+        VBox box = new VBox(10, dealerLabel, dealerCardsBox, dealerTotalLabel);
         box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(10));
         box.setStyle("-fx-background-color: #1a3d0a; -fx-background-radius: 10;");
@@ -133,21 +132,23 @@ public class MultiplayerTableView extends BorderPane {
      * Update dealer's display
      */
     public void updateDealer(List<Card> cards, boolean showAll) {
-        StringBuilder sb = new StringBuilder();
+        dealerCardsBox.getChildren().clear();
         int total = 0;
 
         for (int i = 0; i < cards.size(); i++) {
             if (i == 1 && !showAll) {
-                sb.append("[Hidden]");
+                dealerCardsBox.getChildren().add(createHiddenCard());
             } else {
                 Card card = cards.get(i);
-                sb.append(card.toString());
+                dealerCardsBox.getChildren().add(createCardSymbol(
+                    card.suit().symbol(),
+                    card.rank().symbol(),
+                    card.suit().isRed() ? "red" : "black"
+                ));
                 total += card.baseValue();
             }
-            if (i < cards.size() - 1) sb.append(", ");
         }
 
-        dealerCardsArea.setText(sb.toString());
         dealerTotalLabel.setText(showAll ? "Total: " + total : "Total: ?");
     }
 
@@ -257,25 +258,89 @@ public class MultiplayerTableView extends BorderPane {
     }
 
     /**
+     * Creates a visual card representation
+     */
+    private VBox createCardSymbol(String symbol, String value, String color) {
+        Label valueLabel = new Label(value);
+        valueLabel.setStyle(
+            "-fx-font-size: 18px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-text-fill: " + color + ";"
+        );
+        valueLabel.setAlignment(Pos.CENTER);
+        
+        Label symbolLabel = new Label(symbol);
+        symbolLabel.setStyle(
+            "-fx-font-size: 30px; " +
+            "-fx-text-fill: " + color + ";"
+        );
+        symbolLabel.setAlignment(Pos.CENTER);
+        
+        VBox cardContent = new VBox(2, valueLabel, symbolLabel);
+        cardContent.setAlignment(Pos.CENTER);
+        cardContent.setStyle(
+            "-fx-border-color: #333333; " +
+            "-fx-border-width: 2px; " +
+            "-fx-border-radius: 6; " +
+            "-fx-background-color: white; " +
+            "-fx-background-radius: 6; " +
+            "-fx-padding: 8 15 8 15; " +
+            "-fx-min-width: 55px; " +
+            "-fx-min-height: 80px; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 4, 0, 2, 2);"
+        );
+        
+        return cardContent;
+    }
+
+    /**
+     * Creates a hidden (face-down) card
+     */
+    private VBox createHiddenCard() {
+        Label hiddenLabel = new Label("?");
+        hiddenLabel.setStyle(
+            "-fx-font-size: 28px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-text-fill: white;"
+        );
+        hiddenLabel.setAlignment(Pos.CENTER);
+        
+        VBox cardContent = new VBox(hiddenLabel);
+        cardContent.setAlignment(Pos.CENTER);
+        cardContent.setStyle(
+            "-fx-border-color: #333333; " +
+            "-fx-border-width: 2px; " +
+            "-fx-border-radius: 6; " +
+            "-fx-background-color: #4169E1; " +
+            "-fx-background-radius: 6; " +
+            "-fx-padding: 8 15 8 15; " +
+            "-fx-min-width: 55px; " +
+            "-fx-min-height: 80px; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 4, 0, 2, 2);"
+        );
+        
+        return cardContent;
+    }
+
+    /**
      * Inner class for individual player display
      */
-    private static class PlayerPanel extends VBox {
+    private class PlayerPanel extends VBox {
         private final Label nameLabel;
-        private final TextArea cardsArea;
+        private final HBox cardsBox;
         private final Label balanceLabel;
         private final Label totalLabel;
 
         public PlayerPanel(String playerId, String displayName) {
-            super(5);
+            super(10);
 
             nameLabel = new Label(displayName);
             nameLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
             nameLabel.setTextFill(Color.WHITE);
 
-            cardsArea = new TextArea();
-            cardsArea.setEditable(false);
-            cardsArea.setPrefHeight(50);
-            cardsArea.setStyle("-fx-control-inner-background: #3d5d2a;");
+            cardsBox = new HBox(8);
+            cardsBox.setAlignment(Pos.CENTER);
+            cardsBox.setStyle("-fx-padding: 5;");
 
             totalLabel = new Label("Total: 0");
             totalLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
@@ -284,28 +349,30 @@ public class MultiplayerTableView extends BorderPane {
             balanceLabel = new Label("Balance: $0");
             balanceLabel.setTextFill(Color.WHITE);
 
-            getChildren().addAll(nameLabel, cardsArea, totalLabel, balanceLabel);
-            setAlignment(Pos.CENTER_LEFT);
+            getChildren().addAll(nameLabel, cardsBox, totalLabel, balanceLabel);
+            setAlignment(Pos.CENTER);
             setPadding(new Insets(10));
             setStyle("-fx-background-color: #3d5d2a; -fx-background-radius: 5; -fx-border-color: #ffffff; -fx-border-radius: 5;");
         }
 
         public void update(List<Card> cards, int balance, boolean isActive) {
-            StringBuilder sb = new StringBuilder();
+            cardsBox.getChildren().clear();
             int total = 0;
-            for (int i = 0; i < cards.size(); i++) {
-                Card card = cards.get(i);
-                sb.append(card.toString());
-                if (i < cards.size() - 1) sb.append(", ");
+            for (Card card : cards) {
+                cardsBox.getChildren().add(createCardSymbol(
+                    card.suit().symbol(),
+                    card.rank().symbol(),
+                    card.suit().isRed() ? "red" : "black"
+                ));
                 total += card.baseValue();
             }
-            cardsArea.setText(sb.toString());
             totalLabel.setText("Total: " + total);
             balanceLabel.setText("Balance: $" + balance);
 
             if (isActive) {
                 setStyle("-fx-background-color: #4d6d3a; -fx-background-radius: 5; -fx-border-color: yellow; -fx-border-width: 3; -fx-border-radius: 5;");
-                nameLabel.setText(nameLabel.getText().split(" ")[0] + " [YOUR TURN]");
+                String baseName = nameLabel.getText().split(" ")[0];
+                nameLabel.setText(baseName + " [YOUR TURN]");
                 nameLabel.setTextFill(Color.YELLOW);
             } else {
                 setStyle("-fx-background-color: #3d5d2a; -fx-background-radius: 5; -fx-border-color: #ffffff; -fx-border-radius: 5;");

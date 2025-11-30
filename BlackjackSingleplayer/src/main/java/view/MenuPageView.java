@@ -4,6 +4,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -15,7 +17,9 @@ import javafx.scene.text.TextAlignment;
  */
 public class MenuPageView extends BorderPane {
 
-    public final Button createGameButton = new Button("Create Blackjack Game");
+    public final MenuButton createGameButton = new MenuButton("🎮 Create Blackjack Game");
+    public final MenuItem singlePlayerItem = new MenuItem("Single Player");
+    public final MenuItem multiplayerItem = new MenuItem("Multiplayer");
     public final Button joinGameButton = new Button("Join Game");
     public final Button tutorialButton = new Button("Tutorial");
     public final Button closeButton = new Button("Close Application");
@@ -44,8 +48,11 @@ public class MenuPageView extends BorderPane {
         buttonContainer.setMaxWidth(450);
         buttonContainer.setMinWidth(380);
 
-        // Style buttons
-        styleMenuButton(createGameButton, "#2d5016", "🎮");
+        // Setup create game dropdown
+        createGameButton.getItems().addAll(singlePlayerItem, multiplayerItem);
+        styleMenuButton(createGameButton, "#2d5016");
+        
+        // Style other buttons
         styleMenuButton(joinGameButton, "#2d5016", "👥");
         styleMenuButton(tutorialButton, "#2d5016", "📖");
         styleMenuButton(closeButton, "#8B0000", "❌");
@@ -73,6 +80,47 @@ public class MenuPageView extends BorderPane {
         setCenter(scrollPane);
     }
 
+    // Overloaded for MenuButton (dropdown)
+    private void styleMenuButton(MenuButton button, String color) {
+        button.setStyle(
+            "-fx-font-size: 16px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: " + color + "; " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 12 35 12 35; " +
+            "-fx-background-radius: 10; " +
+            "-fx-cursor: hand; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+        );
+        button.setMinWidth(350);
+        button.setMaxWidth(350);
+        
+        // Hover effect
+        button.setOnMouseEntered(e -> button.setStyle(
+            "-fx-font-size: 16px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: derive(" + color + ", 20%); " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 12 35 12 35; " +
+            "-fx-background-radius: 10; " +
+            "-fx-cursor: hand; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 8, 0, 3, 3); " +
+            "-fx-scale-x: 1.03; " +
+            "-fx-scale-y: 1.03;"
+        ));
+        
+        button.setOnMouseExited(e -> button.setStyle(
+            "-fx-font-size: 16px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: " + color + "; " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 12 35 12 35; " +
+            "-fx-background-radius: 10; " +
+            "-fx-cursor: hand; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+        ));
+    }
+    
     private void styleMenuButton(Button button, String color, String emoji) {
         button.setStyle(
             "-fx-font-size: 16px; " +
