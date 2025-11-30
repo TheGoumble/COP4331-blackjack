@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 /**
  * Lobby view for browsing and joining game sessions
  * 
- * @author Javier Vargas, Group 12
+ * @author Javier Vargas, Luca Lombardo Group 12
  */
 public class GameLobbyView extends BorderPane {
 
@@ -32,16 +32,14 @@ public class GameLobbyView extends BorderPane {
     private Runnable onBack = () -> {};
 
     public GameLobbyView() {
-        setPadding(new Insets(20));
-        setStyle("-fx-background-color: linear-gradient(to bottom, #1a1a2e, #16213e);");
+        setStyle("-fx-background-color: #2d5016;");
 
         // Title
-        titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 32));
-        titleLabel.setTextFill(Color.WHITE);
+        titleLabel.setStyle("-fx-font-size: 42px; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: 'Arial';");
         
         VBox topSection = new VBox(10, titleLabel);
         topSection.setAlignment(Pos.CENTER);
-        topSection.setPadding(new Insets(0, 0, 20, 0));
+        topSection.setPadding(new Insets(30, 0, 20, 0));
         setTop(topSection);
 
         // Center - Active games list
@@ -68,77 +66,120 @@ public class GameLobbyView extends BorderPane {
 
     private VBox createCenterSection() {
         Label gamesLabel = new Label("Available Games on Local Network:");
-        gamesLabel.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        gamesLabel.setTextFill(Color.WHITE);
+        gamesLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
 
-        gamesListView.setPrefHeight(300);
+        gamesListView.setPrefHeight(250);
         gamesListView.setStyle(
-            "-fx-background-color: #0f3460; " +
-            "-fx-border-color: #e94560; " +
-            "-fx-border-width: 2; " +
-            "-fx-border-radius: 5;"
+            "-fx-background-color: white; " +
+            "-fx-border-color: #cccccc; " +
+            "-fx-border-width: 2px; " +
+            "-fx-border-radius: 8px; " +
+            "-fx-background-radius: 8px;"
         );
 
-        HBox buttonsRow = new HBox(10, joinSelectedButton, refreshButton);
+        HBox buttonsRow = new HBox(15, joinSelectedButton, refreshButton);
         buttonsRow.setAlignment(Pos.CENTER);
+        buttonsRow.setPadding(new Insets(15, 0, 0, 0));
 
-        VBox box = new VBox(10, gamesLabel, gamesListView, buttonsRow);
-        box.setAlignment(Pos.CENTER);
-        box.setPadding(new Insets(10));
+        VBox contentBox = new VBox(15, gamesLabel, gamesListView, buttonsRow);
+        contentBox.setAlignment(Pos.CENTER);
+        contentBox.setPadding(new Insets(30, 40, 30, 40));
+        contentBox.setStyle(
+            "-fx-background-color: white; " +
+            "-fx-background-radius: 15; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 10, 0, 0, 5);"
+        );
+        contentBox.setMaxWidth(700);
+        
+        VBox wrapper = new VBox(contentBox);
+        wrapper.setAlignment(Pos.CENTER);
+        wrapper.setPadding(new Insets(20));
+        
+        ScrollPane scrollPane = new ScrollPane(wrapper);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background: #2d5016; -fx-background-color: #2d5016;");
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        
+        VBox box = new VBox(scrollPane);
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
         return box;
     }
 
     private VBox createBottomSection() {
         Label instructionLabel = new Label("Games are discovered via online matchmaking");
-        instructionLabel.setFont(Font.font("Arial", 12));
-        instructionLabel.setTextFill(Color.LIGHTGRAY);
+        instructionLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: white; -fx-font-family: 'Arial'; -fx-font-style: italic;");
 
-        statusLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        statusLabel.setTextFill(Color.YELLOW);
+        statusLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #FFD700; -fx-font-family: 'Arial';");
 
         // Direct connect section for internet play
-        Label orLabel = new Label("- OR Enter Game Code / IP:Port -");
-        orLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        orLabel.setTextFill(Color.LIGHTGRAY);
+        Label orLabel = new Label("OR Enter Game Code / IP:Port");
+        orLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: 'Arial';");
         
         directConnectField.setPromptText("Game Code (e.g., ABC123) or IP:Port (e.g., 203.0.113.5:54321)");
-        directConnectField.setPrefWidth(450);
+        directConnectField.setPrefWidth(400);
         directConnectField.setStyle(
-            "-fx-background-color: #0f3460; " +
-            "-fx-text-fill: white; " +
+            "-fx-background-color: white; " +
+            "-fx-text-fill: black; " +
             "-fx-prompt-text-fill: gray; " +
-            "-fx-border-color: #e94560; " +
-            "-fx-border-width: 2; " +
-            "-fx-border-radius: 5;"
+            "-fx-border-color: #cccccc; " +
+            "-fx-border-width: 2px; " +
+            "-fx-border-radius: 8px; " +
+            "-fx-background-radius: 8px; " +
+            "-fx-padding: 8;"
         );
         
         HBox directConnectBox = new HBox(10, directConnectField, directConnectButton);
         directConnectBox.setAlignment(Pos.CENTER);
 
-        VBox box = new VBox(15, instructionLabel, statusLabel, orLabel, directConnectBox, backButton);
+        VBox box = new VBox(12, instructionLabel, statusLabel, orLabel, directConnectBox, backButton);
         box.setAlignment(Pos.CENTER);
-        box.setPadding(new Insets(20, 0, 0, 0));
+        box.setPadding(new Insets(20, 20, 30, 20));
 
         // Style buttons
-        styleButton(joinSelectedButton, "#e94560");
-        styleButton(refreshButton, "#0f3460");
-        styleButton(directConnectButton, "#e94560");
-        styleButton(backButton, "#533483");
+        styleButton(joinSelectedButton, "#2d5016");
+        styleButton(refreshButton, "#2d5016");
+        styleButton(directConnectButton, "#2d5016");
+        styleButton(backButton, "#8B0000");
 
         return box;
     }
 
     private void styleButton(Button button, String color) {
         button.setStyle(
+            "-fx-font-size: 15px; " +
+            "-fx-font-weight: bold; " +
             "-fx-background-color: " + color + "; " +
             "-fx-text-fill: white; " +
-            "-fx-font-weight: bold; " +
-            "-fx-padding: 10 20; " +
-            "-fx-background-radius: 5; " +
-            "-fx-cursor: hand;"
+            "-fx-padding: 10 25 10 25; " +
+            "-fx-background-radius: 8; " +
+            "-fx-cursor: hand; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
         );
-        button.setOnMouseEntered(e -> button.setOpacity(0.8));
-        button.setOnMouseExited(e -> button.setOpacity(1.0));
+        
+        button.setOnMouseEntered(e -> button.setStyle(
+            "-fx-font-size: 15px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: derive(" + color + ", 20%); " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 10 25 10 25; " +
+            "-fx-background-radius: 8; " +
+            "-fx-cursor: hand; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 8, 0, 3, 3); " +
+            "-fx-scale-x: 1.03; " +
+            "-fx-scale-y: 1.03;"
+        ));
+        
+        button.setOnMouseExited(e -> button.setStyle(
+            "-fx-font-size: 15px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: " + color + "; " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 10 25 10 25; " +
+            "-fx-background-radius: 8; " +
+            "-fx-cursor: hand; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+        ));
     }
 
     private void handleJoinSelected() {
