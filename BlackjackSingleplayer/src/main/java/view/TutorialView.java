@@ -332,7 +332,23 @@ public class TutorialView extends BorderPane {
         hitDesc.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333; -fx-font-family: 'Arial';");
         hitDesc.setWrapText(true);
         
-        VBox hitSection = new VBox(5, hitTitle, hitDesc);
+        // Visual Hit Button Example
+        Button hitButtonExample = new Button("Hit");
+        hitButtonExample.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: #2d5016; " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 8 25 8 25; " +
+            "-fx-background-radius: 5; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+        );
+        hitButtonExample.setOnAction(e -> {}); // No action, just for display
+        HBox hitButtonBox = new HBox(hitButtonExample);
+        hitButtonBox.setAlignment(Pos.CENTER_LEFT);
+        hitButtonBox.setPadding(new Insets(8, 0, 0, 0));
+        
+        VBox hitSection = new VBox(5, hitTitle, hitDesc, hitButtonBox);
         
         // Stand Section
         Label standTitle = new Label("Stand:");
@@ -346,7 +362,23 @@ public class TutorialView extends BorderPane {
         standDesc.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333; -fx-font-family: 'Arial';");
         standDesc.setWrapText(true);
         
-        VBox standSection = new VBox(5, standTitle, standDesc);
+        // Visual Stand Button Example
+        Button standButtonExample = new Button("Stand");
+        standButtonExample.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: #2d5016; " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 8 25 8 25; " +
+            "-fx-background-radius: 5; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+        );
+        standButtonExample.setOnAction(e -> {}); // No action, just for display
+        HBox standButtonBox = new HBox(standButtonExample);
+        standButtonBox.setAlignment(Pos.CENTER_LEFT);
+        standButtonBox.setPadding(new Insets(8, 0, 0, 0));
+        
+        VBox standSection = new VBox(5, standTitle, standDesc, standButtonBox);
         
         // Important Section
         Label importantTitle = new Label("Important:");
@@ -457,7 +489,7 @@ public class TutorialView extends BorderPane {
         
         Label pushExample = new Label("Bet $10 → Get $10 back");
         pushExample.setStyle("-fx-font-size: 15px; -fx-padding: 10 0 0 20; -fx-text-fill: #333333; -fx-font-family: 'Arial';");
-        
+
         VBox pushSection = new VBox(8, pushTitle, pushDesc, pushExample);
         pushSection.setAlignment(Pos.CENTER_LEFT);
         
@@ -486,37 +518,113 @@ public class TutorialView extends BorderPane {
         Label title = new Label("Using This Application");
         title.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
         
-        Label body = new Label(
-                """
-                How to Play in This App:
-                
-                Starting a Round:
-                • Enter your bet amount in the bet field
-                • Click "Place Bet" to begin
-                • Cards will be dealt automatically
-                
-                During Your Turn:
-                • Click "Hit" to receive another card
-                • Click "Stand" when you're satisfied with your hand
-                • Your total is displayed above your cards
-                
-                After the Round:
-                • Results are shown automatically
-                • Your balance is updated
-                • Place a new bet to play again
-                
-                Ready to Play?
-                • Click "Exit Tutorial" to return to the menu
-                • Start your Blackjack game and have fun!
-                """
-        );
-        body.setWrapText(true);
-        body.setStyle("-fx-font-size: 14px;");
+        Label subtitle = new Label("Understanding the Game Interface:");
+        subtitle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #555555; -fx-font-family: 'Arial';");
         
-        VBox content = new VBox(20, title, body);
+        // Bet Amount Field
+        Label betAmountTitle = new Label("Bet Amount Field:");
+        betAmountTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
+        Label betAmountDesc = new Label("• Text field where you enter how much you want to bet\n• Must be within your available balance\n• Required before starting a round");
+        betAmountDesc.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333; -fx-font-family: 'Arial';");
+        betAmountDesc.setWrapText(true);
+        VBox betAmountSection = new VBox(5, betAmountTitle, betAmountDesc);
+        
+        // Place Bet Button
+        Label placeBetTitle = new Label("Place Bet Button:");
+        placeBetTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
+        Label placeBetDesc = new Label("• Click this after entering your bet amount\n• Starts the round and deals initial cards\n• Cannot place bet if amount is invalid or exceeds balance");
+        placeBetDesc.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333; -fx-font-family: 'Arial';");
+        placeBetDesc.setWrapText(true);
+        Button placeBetExample = new Button("Place Bet");
+        placeBetExample.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: white; " +
+            "-fx-text-fill: black; " +
+            "-fx-padding: 8 25 8 25; " +
+            "-fx-background-radius: 5; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+        );
+        placeBetExample.setOnAction(e -> {});
+        HBox placeBetBox = new HBox(placeBetExample);
+        placeBetBox.setPadding(new Insets(8, 0, 0, 0));
+        VBox placeBetSection = new VBox(5, placeBetTitle, placeBetDesc, placeBetBox);
+        
+        // Hit Button
+        Label hitBtnTitle = new Label("Hit Button:");
+        hitBtnTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
+        Label hitBtnDesc = new Label("• Click to receive another card\n• Available during your turn\n• Disabled when it's not your turn or after you stand");
+        hitBtnDesc.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333; -fx-font-family: 'Arial';");
+        hitBtnDesc.setWrapText(true);
+        Button hitExample = new Button("Hit");
+        hitExample.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: #2d5016; " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 8 25 8 25; " +
+            "-fx-background-radius: 5; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+        );
+        hitExample.setOnAction(e -> {});
+        HBox hitBox = new HBox(hitExample);
+        hitBox.setPadding(new Insets(8, 0, 0, 0));
+        VBox hitBtnSection = new VBox(5, hitBtnTitle, hitBtnDesc, hitBox);
+        
+        // Stand Button
+        Label standBtnTitle = new Label("Stand Button:");
+        standBtnTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
+        Label standBtnDesc = new Label("• Click to end your turn and keep your current hand\n• Dealer will then reveal their cards and play\n• Cannot be undone once clicked");
+        standBtnDesc.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333; -fx-font-family: 'Arial';");
+        standBtnDesc.setWrapText(true);
+        Button standExample = new Button("Stand");
+        standExample.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: #2d5016; " +
+            "-fx-text-fill: white; " +
+            "-fx-padding: 8 25 8 25; " +
+            "-fx-background-radius: 5; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+        );
+        standExample.setOnAction(e -> {});
+        HBox standBox = new HBox(standExample);
+        standBox.setPadding(new Insets(8, 0, 0, 0));
+        VBox standBtnSection = new VBox(5, standBtnTitle, standBtnDesc, standBox);
+        
+        // Start Round Button
+        Label startRoundTitle = new Label("Start Round Button:");
+        startRoundTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
+        Label startRoundDesc = new Label("• Appears after a round ends\n• Click to begin a new round\n• Allows you to place a new bet");
+        startRoundDesc.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333; -fx-font-family: 'Arial';");
+        startRoundDesc.setWrapText(true);
+        Button startRoundExample = new Button("Start Round");
+        startRoundExample.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-color: white; " +
+            "-fx-text-fill: black; " +
+            "-fx-padding: 8 25 8 25; " +
+            "-fx-background-radius: 5; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);"
+        );
+        startRoundExample.setOnAction(e -> {});
+        HBox startRoundBox = new HBox(startRoundExample);
+        startRoundBox.setPadding(new Insets(8, 0, 0, 0));
+        VBox startRoundSection = new VBox(5, startRoundTitle, startRoundDesc, startRoundBox);
+        
+        // Game Flow Summary
+        Label flowTitle = new Label("Typical Game Flow:");
+        flowTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d5016; -fx-font-family: 'Arial';");
+        Label flowDesc = new Label("1. Enter bet amount → 2. Place Bet → 3. Cards dealt → 4. Hit/Stand → 5. Round ends → 6. Start Round (repeat)");
+        flowDesc.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333; -fx-font-family: 'Arial'; -fx-font-style: italic;");
+        flowDesc.setWrapText(true);
+        VBox flowSection = new VBox(5, flowTitle, flowDesc);
+        
+        VBox content = new VBox(18, title, subtitle, betAmountSection, placeBetSection, hitBtnSection, standBtnSection, startRoundSection, flowSection);
         content.setAlignment(Pos.TOP_LEFT);
         content.setPadding(new Insets(40));
-        content.setStyle("-fx-background-color: #f5f5f5; -fx-background-radius: 10;");
+        content.setStyle("-fx-background-color: white; -fx-background-radius: 10;");
         
         return content;
     }
