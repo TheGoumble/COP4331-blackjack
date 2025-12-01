@@ -4,6 +4,8 @@ import command.Command;
 import model.GameEngine;
 import strategy.BlackjackStrategy;
 import strategy.StrategyFactory;
+import org.bitlet.weupnp.GatewayDevice;
+import org.bitlet.weupnp.GatewayDiscover;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -26,6 +28,8 @@ public class DesignatedHost {
     private final int port;
     private String gameCode;
     private ApiClient apiClient;
+    private GatewayDevice gateway;
+    private boolean upnpEnabled = false;
     
     public DesignatedHost(String hostId, String displayName) {
         this(hostId, displayName, StrategyFactory.getDefaultStrategy());
@@ -61,8 +65,11 @@ public class DesignatedHost {
             serverSocket = new ServerSocket(port);
             running = true;
             
-            String hostAddress = InetAddress.getLocalHost().getHostAddress();
-            System.out.println("[HOST] Server started on " + hostAddress + ":" + port);
+            String localAddress = InetAddress.getLocalHost().getHostAddress();
+            System.out.println("[HOST] Server started on LOCAL: " + localAddress + ":" + port);
+            
+            // Try UPnP port mapping
+            setupUPnP();
             
             // Start accepting connections in a background thread
             acceptThread = new Thread(this::acceptConnections);
@@ -344,10 +351,101 @@ public class DesignatedHost {
     }
     
     /**
+     * Set up UPnP port forwarding
+     */
+    private void setupUPnP() {
+        try {
+            System.out.println("[UPnP] Attempting to discover gateway...");
+            GatewayDiscover discover = new GatewayDiscover();
+            discover.discover();
+            
+            gateway = discover.getValidGateway();
+            
+            if (gateway == null) {
+                System.out.println("[UPnP] No valid gateway found. Manual port forwarding required.");
+                printManualSetupInstructions();
+                return;
+            }
+            
+            String localAddress = InetAddress.getLocalHost().getHostAddress();
+            String externalIP = gateway.getExternalIPAddress();
+            
+            System.out.println("[UPnP] Found gateway: " + gateway.getModelName());
+            System.out.println("[UPnP] External IP: " + externalIP);
+            
+            // Add port mapping
+            boolean mapped = gateway.addPortMapping(
+                port,                          // External port
+                port,                          // Internal port
+                localAddress,                  // Internal client
+                "TCP",                         // Protocol
+                "Blackjack Game Server"        // Description
+            );
+            
+            if (mapped) {
+                upnpEnabled = true;
+                System.out.println("[UPnP] ✓ Port mapping successful!");
+                System.out.println("[HOST] PUBLIC CONNECTION: " + externalIP + ":" + port);
+                System.out.println("[HOST] Share game code with friends to join!");
+            } else {
+                System.out.println("[UPnP] Failed to create port mapping.");
+                printManualSetupInstructions();
+            }
+            
+        } catch (Exception e) {
+            System.out.println("[UPnP] Error: " + e.getMessage());
+            printManualSetupInstructions();
+        }
+    }
+    
+    /**
+     * Print manual port forwarding instructions
+     */
+    private void printManualSetupInstructions() {
+        try {
+            String localAddress = InetAddress.getLocalHost().getHostAddress();
+            System.out.println(" MANUAL SETUP REQUIRED FOR INTERNET PLAY");
+            System.out.println("1. Log into your router (usually 192.168.1.1 or 192.168.0.1)");
+            System.out.println("2. Find Port Forwarding settings");
+            System.out.println("3. Forward port " + port + " (TCP) to " + localAddress);
+            System.out.println("4. Get your public IP from https://whatismyip.com");
+            System.out.println("5. Give friends: <your-public-ip>:" + port);
+            System.out.println("\nNOTE: Game will work on local network without setup!\n");
+        } catch (UnknownHostException e) {
+            System.err.println("[HOST] Could not determine local address");
+        }
+    }
+    
+    /**
+     * Get public IP address (from UPnP gateway or fallback)
+     */
+    public String getPublicIP() {
+        if (gateway != null && upnpEnabled) {
+            try {
+                return gateway.getExternalIPAddress();
+            } catch (Exception e) {
+                System.err.println("[UPnP] Error getting external IP: " + e.getMessage());
+            }
+        }
+        return null;
+    }
+    
+    /**
      * Shutdown the server
      */
     public void shutdown() {
         running = false;
+        
+        // Remove UPnP port mapping
+        if (gateway != null && upnpEnabled) {
+            try {
+                System.out.println("[UPnP] Removing port mapping...");
+                gateway.deletePortMapping(port, "TCP");
+                System.out.println("[UPnP] Port mapping removed.");
+            } catch (Exception e) {
+                System.err.println("[UPnP] Error removing port mapping: " + e.getMessage());
+            }
+        }
         
         // Unregister from API
         if (gameCode != null && apiClient != null) {

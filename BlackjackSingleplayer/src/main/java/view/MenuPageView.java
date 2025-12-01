@@ -18,7 +18,8 @@ public class MenuPageView extends BorderPane {
 
     public final MenuButton createGameButton = new MenuButton("🎮 Create Blackjack Game");
     public final MenuItem singlePlayerItem = new MenuItem("Single Player");
-    public final MenuItem multiplayerItem = new MenuItem("Multiplayer");
+    public final MenuItem localMultiplayerItem = new MenuItem("Local Multiplayer");
+    public final MenuItem onlineMultiplayerItem = new MenuItem("Online Multiplayer");
     public final Button joinGameButton = new Button("Join Game");
     public final Button tutorialButton = new Button("Tutorial");
     public final Button closeButton = new Button("Close Application");
@@ -48,7 +49,7 @@ public class MenuPageView extends BorderPane {
         buttonContainer.setMinWidth(380);
 
         // Setup create game dropdown
-        createGameButton.getItems().addAll(singlePlayerItem, multiplayerItem);
+        createGameButton.getItems().addAll(singlePlayerItem, localMultiplayerItem, onlineMultiplayerItem);
         styleMenuButton(createGameButton, "#2d5016");
         
         // Style other buttons

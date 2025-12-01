@@ -6,6 +6,7 @@ network\GameUpdateMessage$MessageType.class
 model\Deck.class
 command\Command.class
 view\DealerTableView.class
+app\Launcher.class
 observer\CreateGameObserver.class
 observer\JoinGameObserver.class
 view\MenuPageView.class

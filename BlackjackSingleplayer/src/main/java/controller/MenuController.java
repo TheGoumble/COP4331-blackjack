@@ -78,8 +78,13 @@ public class MenuController {
             router.showSinglePlayerTable();
         });
         
-        view.multiplayerItem.setOnAction(e -> {
-            menuSubject.notifyMenuObserver("CREATE_GAME", currentUser.getUserId());
+        view.localMultiplayerItem.setOnAction(e -> {
+            menuSubject.notifyMenuObserver("CREATE_LOCAL_GAME", currentUser.getUserId());
+            router.setCurrentUser(currentUser); // Pass user to router
+        });
+        
+        view.onlineMultiplayerItem.setOnAction(e -> {
+            menuSubject.notifyMenuObserver("CREATE_ONLINE_GAME", currentUser.getUserId());
             router.setCurrentUser(currentUser); // Pass user to router
         });
 

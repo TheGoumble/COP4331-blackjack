@@ -29,6 +29,11 @@
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.bitlet</groupId>
+            <artifactId>weupnp</artifactId>
+            <version>0.1.4</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -49,6 +54,54 @@
                 <configuration>
                     <mainClass>app.MainApp</mainClass>
                 </configuration>
+            </plugin>
+            <!-- Skip creating the default JAR since we only want the shaded JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+            </plugin>
+            <!-- Create fat JAR with all dependencies (JavaFX, Gson, UPnP) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>app.Launcher</mainClass>
+                                </transformer>
+                            </transformers>
+                            <!-- Output file will be Blackjack.jar (no version suffix) -->
+                            <finalName>Blackjack</finalName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Delete the original JAR, keep only the shaded JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <delete file="${project.build.directory}/${project.build.finalName}.jar" failonerror="false"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

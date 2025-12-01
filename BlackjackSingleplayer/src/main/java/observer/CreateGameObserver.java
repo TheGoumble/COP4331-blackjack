@@ -26,15 +26,46 @@ public class CreateGameObserver implements MenuObserver {
     
     @Override
     public void update(String action, String userId) {
-        if ("CREATE_GAME".equals(action)) {
-            startGameSession(userId);
+        if ("CREATE_LOCAL_GAME".equals(action)) {
+            startLocalGameSession(userId);
+        } else if ("CREATE_ONLINE_GAME".equals(action)) {
+            startOnlineGameSession(userId);
         }
     }
     
     /**
-     * Start a new game session with this user as host
+     * Start a local multiplayer game session (no API registration)
      */
-    private void startGameSession(String userId) {
+    private void startLocalGameSession(String userId) {
+        // Generate unique session ID
+        sessionId = "local_" + System.currentTimeMillis();
+        
+        // Get display name from router's current user
+        String displayName = router.getCurrentUser() != null ? 
+            router.getCurrentUser().getDisplayName() : userId;
+        
+        // Create host (P2P server) - no API registration
+        host = new DesignatedHost(userId, displayName);
+        
+        // Create peer for this player and connect to host
+        peer = new BlackjackPeer(userId);
+        peer.setDisplayName(displayName);
+        peer.connectToHost(host);
+        
+        System.out.println("===========================================");
+        System.out.println("Created LOCAL game session: " + sessionId);
+        System.out.println(">>> CONNECTION: " + host.getConnectionString() + " <<<");
+        System.out.println("Share this address for direct connection!");
+        System.out.println("===========================================");
+        
+        // Navigate to multiplayer table
+        router.showMultiplayerTable(peer, host, sessionId);
+    }
+    
+    /**
+     * Start an online game session with API registration
+     */
+    private void startOnlineGameSession(String userId) {
         // Generate unique session ID and short game code
         sessionId = "game_" + System.currentTimeMillis();
         gameCode = generateGameCode();
@@ -43,11 +74,22 @@ public class CreateGameObserver implements MenuObserver {
         String displayName = router.getCurrentUser() != null ? 
             router.getCurrentUser().getDisplayName() : userId;
         
-        // Create host (P2P server)
+        // Create host (P2P server) - UPnP will attempt automatic port forwarding
         host = new DesignatedHost(userId, displayName);
         
-        // Register game with API matchmaking server
-        String hostAddress = host.getConnectionString().split(":")[0];
+        // Register game with API matchmaking server using public IP if available
+        String publicIP = host.getPublicIP();
+        String hostAddress;
+        
+        if (publicIP != null) {
+            hostAddress = publicIP;
+            System.out.println("[ONLINE] Using public IP: " + publicIP);
+        } else {
+            // Fallback to local IP (won't work over internet)
+            hostAddress = host.getConnectionString().split(":")[0];
+            System.out.println("[ONLINE] WARNING: Using local IP - internet play may not work!");
+        }
+        
         int hostPort = host.getPort();
         
         ApiClient.RegisterResponse response = apiClient.registerGame(
