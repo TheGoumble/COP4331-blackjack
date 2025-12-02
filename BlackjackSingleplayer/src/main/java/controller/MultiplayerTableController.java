@@ -233,14 +233,16 @@ public class MultiplayerTableController {
                     break;
                     
                 case HOST_DISCONNECTED:
-                    // Host has disconnected - show error and return to menu
-                    javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                        javafx.scene.control.Alert.AlertType.ERROR
-                    );
-                    alert.setTitle("Host Disconnected");
-                    alert.setHeaderText("Connection Lost");
-                    alert.setContentText("The host has disconnected from the game. Returning to menu...");
-                    alert.showAndWait();
+                    // Host has disconnected - show error and return to menu (only for non-host players)
+                    if (!isHost) {
+                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                            javafx.scene.control.Alert.AlertType.ERROR
+                        );
+                        alert.setTitle("Host Disconnected");
+                        alert.setHeaderText("Connection Lost");
+                        alert.setContentText("The host has disconnected from the game. Returning to menu...");
+                        alert.showAndWait();
+                    }
                     
                     // Return to menu
                     peer.disconnect();

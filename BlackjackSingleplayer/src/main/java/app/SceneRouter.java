@@ -70,7 +70,7 @@ public class SceneRouter {
         DealerTableView tableView = new DealerTableView();
         new DealerTableController(game, tableView, this);
 
-        Scene scene = new Scene(tableView, 900, 600);
+        Scene scene = new Scene(tableView, 1400, 800);
         stage.setScene(scene);
         stage.setTitle("Blackjack - Table");
     }
@@ -94,7 +94,7 @@ public class SceneRouter {
         MultiplayerTableView tableView = new MultiplayerTableView();
         new MultiplayerTableController(peer, host, tableView, this, sessionId);
 
-        Scene scene = new Scene(tableView, 1200, 700);
+        Scene scene = new Scene(tableView, 1400, 800);
         stage.setScene(scene);
         stage.setTitle("Blackjack - Multiplayer Table");
     }
