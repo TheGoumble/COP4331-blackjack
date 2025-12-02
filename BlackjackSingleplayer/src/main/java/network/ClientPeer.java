@@ -112,19 +112,21 @@ public class ClientPeer {
                     });
                 }
             } catch (EOFException | SocketException e) {
-                // Connection closed - host disconnected
-                System.err.println("[CLIENT] Host disconnected");
-                connected = false;
-                // Notify listeners of host disconnect
-                javafx.application.Platform.runLater(() -> {
-                    GameUpdateMessage disconnectMsg = new GameUpdateMessage(
-                        GameUpdateMessage.MessageType.HOST_DISCONNECTED,
-                        "Host has disconnected from the game"
-                    );
-                    for (Consumer<GameUpdateMessage> listener : updateListeners) {
-                        listener.accept(disconnectMsg);
-                    }
-                });
+                // Connection closed - only notify if we didn't initiate the disconnect
+                if (connected) {
+                    System.err.println("[CLIENT] Host disconnected");
+                    connected = false;
+                    // Notify listeners of host disconnect
+                    javafx.application.Platform.runLater(() -> {
+                        GameUpdateMessage disconnectMsg = new GameUpdateMessage(
+                            GameUpdateMessage.MessageType.HOST_DISCONNECTED,
+                            "Host has disconnected from the game"
+                        );
+                        for (Consumer<GameUpdateMessage> listener : updateListeners) {
+                            listener.accept(disconnectMsg);
+                        }
+                    });
+                }
                 break;
             } catch (Exception e) {
                 System.err.println("[CLIENT] Error receiving update: " + e.getMessage());

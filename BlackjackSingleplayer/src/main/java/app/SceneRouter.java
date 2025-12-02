@@ -79,7 +79,7 @@ public class SceneRouter {
         GameLobbyView lobbyView = new GameLobbyView();
         new GameLobbyController(lobbyView, this, userId);
 
-        Scene scene = new Scene(lobbyView, 1000, 700);
+        Scene scene = new Scene(lobbyView, 1400, 800);
         stage.setScene(scene);
         stage.setTitle("Blackjack - Game Lobby");
     }
@@ -124,7 +124,7 @@ public class SceneRouter {
             MultiplayerTableView tableView = new MultiplayerTableView();
             new MultiplayerTableController(peer, null, tableView, this, "remote_" + hostAddress + ":" + port);
 
-            Scene scene = new Scene(tableView, 1200, 700);
+            Scene scene = new Scene(tableView, 1400, 800);
             stage.setScene(scene);
             stage.setTitle("Blackjack - Multiplayer Table");
         } catch (Exception e) {
