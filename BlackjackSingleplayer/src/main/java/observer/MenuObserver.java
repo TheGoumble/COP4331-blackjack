@@ -4,6 +4,8 @@ package observer;
  * Observer interface for menu actions
  * Implements Observer pattern for menu button clicks
  * 
+ * OBSERVER PATTERN: This is the Observer interface
+ * 
  * @author Javier Vargas, Group 12
  */
 public interface MenuObserver {

@@ -3,6 +3,7 @@ package model;
 import java.io.Serializable;
 
 /**
+ * MVC PATTERN: This is a Model (game entity)
  *
  * @author Bridjet Walker
  */

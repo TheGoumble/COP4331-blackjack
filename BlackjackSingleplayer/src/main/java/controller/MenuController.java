@@ -10,6 +10,8 @@ import java.util.Optional;
 /**
  * Menu controller using Observer pattern
  * 
+ * MVC PATTERN: This is a Controller (handles user input and navigation)
+ * 
  * @author Bridjet Walker, Javier Vargas, Group 12
  */
 public class MenuController {

@@ -6,6 +6,8 @@ import app.SceneRouter;
  * Observer for JoinGame button
  * Shows the game lobby where players can browse and join sessions
  * 
+ * OBSERVER PATTERN: This is a Concrete Observer
+ * 
  * @author Javier Vargas, Group 12
  */
 public class JoinGameObserver implements MenuObserver {

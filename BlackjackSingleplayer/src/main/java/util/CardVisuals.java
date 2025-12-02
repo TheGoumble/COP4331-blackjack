@@ -5,7 +5,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
 /**
- * Factory class for creating consistent card visual elements
+ * Class for creating consistent card visual elements
  * Eliminates code duplication across views
  * 
  * @author Group 12

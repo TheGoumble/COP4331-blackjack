@@ -1,6 +1,7 @@
 package model;
 
 /**
+ * MVC PATTERN: This is a Model (game state)
  *
  * @author Bridjet Walker
  */

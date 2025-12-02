@@ -16,6 +16,8 @@ import java.util.function.Consumer;
 /**
  * Multiplayer table view with chip-based betting and oval table
  * 
+ * MVC PATTERN: This is a View (user interface)
+ * 
  * @author Javier Vargas, Luca Lombardo Group 12
  */
 public class MultiplayerTableView extends BorderPane {

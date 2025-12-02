@@ -12,6 +12,8 @@ import java.util.function.Consumer;
 /**
  * Lobby view for browsing and joining game sessions
  * 
+ * MVC PATTERN: This is a View (user interface)
+ * 
  * @author Javier Vargas, Luca Lombardo Group 12
  */
 public class GameLobbyView extends BorderPane {

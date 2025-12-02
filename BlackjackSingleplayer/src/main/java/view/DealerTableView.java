@@ -13,6 +13,7 @@ import javafx.scene.layout.*;
 
 import java.util.function.Consumer;
 /**
+ * MVC PATTERN: This is a View (user interface)
  *
  * @author Bridjet Walker, Luca Lombardo
  */

@@ -6,6 +6,8 @@ import java.util.List;
 /**
  * Subject that notifies menu observers of actions
  * 
+ * OBSERVER PATTERN: This is the Subject
+ * 
  * @author Javier Vargas, Group 12
  */
 public class MenuSubject {

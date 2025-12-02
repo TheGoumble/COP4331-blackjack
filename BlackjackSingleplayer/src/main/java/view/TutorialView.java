@@ -16,6 +16,8 @@ import util.StyleConstants;
 /**
  * Tutorial view with slide-based Blackjack rules and instructions
  * 
+ * MVC PATTERN: This is a View (user interface)
+ * 
  * @author Bridjet Walker, Luca Lombardo
  */
 public class TutorialView extends BorderPane {

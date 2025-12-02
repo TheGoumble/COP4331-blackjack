@@ -3,6 +3,7 @@ package controller;
 import app.SceneRouter;
 import view.TutorialView;
 /**
+ * MVC PATTERN: This is a Controller (handles tutorial navigation)
  *
  * @author Bridjet Walker, Luca Lombardo
  */

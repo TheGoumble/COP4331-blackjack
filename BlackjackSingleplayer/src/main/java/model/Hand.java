@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 /**
+ * MVC PATTERN: This is a Model (game entity)
  *
  * @author Bridjet Walker
  */

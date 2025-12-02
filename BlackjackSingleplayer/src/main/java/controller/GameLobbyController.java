@@ -13,6 +13,8 @@ import java.util.Map;
  * Controller for game lobby
  * Handles browsing and joining game sessions
  * 
+ * MVC PATTERN: This is a Controller (handles lobby interactions)
+ * 
  * @author Javier Vargas, Group 12
  */
 public class GameLobbyController {

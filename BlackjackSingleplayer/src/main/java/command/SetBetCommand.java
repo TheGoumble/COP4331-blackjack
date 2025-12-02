@@ -5,6 +5,8 @@ import model.GameEngine;
 /**
  * Command to set a player's bet amount
  * 
+ * COMMAND PATTERN: This is a Concrete Command
+ * 
  * @author Javier Vargas, Group 12
  */
 public class SetBetCommand implements Command {

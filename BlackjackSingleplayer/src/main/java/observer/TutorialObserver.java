@@ -6,6 +6,8 @@ import app.SceneRouter;
  * Observer for Tutorial button
  * Shows the tutorial screen
  * 
+ * OBSERVER PATTERN: This is a Concrete Observer
+ * 
  * @author Javier Vargas, Group 12
  */
 public class TutorialObserver implements MenuObserver {

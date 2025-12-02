@@ -5,6 +5,8 @@ import model.GameEngine;
 /**
  * Command for player to stand (end their turn)
  * 
+ * COMMAND PATTERN: This is a Concrete Command
+ * 
  * @author Javier Vargas, Group 12
  */
 public class StandCommand implements Command {

@@ -1,7 +1,9 @@
 package model;
 
 /**
- * Represents a user/player in the game
+ * Represents a user/player in the system
+ * 
+ * MVC PATTERN: This is a Model (user entity)
  * 
  * @author Javier Vargas, Group 12
  */

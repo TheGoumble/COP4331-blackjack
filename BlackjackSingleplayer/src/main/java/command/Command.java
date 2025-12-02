@@ -7,6 +7,8 @@ import java.io.Serializable;
  * Command interface for Command Pattern
  * Represents player actions that can be executed by the GameEngine
  * 
+ * COMMAND PATTERN: This is the Command interface
+ * 
  * @author Javier Vargas, Group 12
  */
 public interface Command extends Serializable {

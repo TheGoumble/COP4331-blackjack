@@ -17,6 +17,8 @@ import java.util.Map;
  * Controller for multiplayer table
  * Handles player commands and updates UI based on game state
  * 
+ * MVC PATTERN: This is a Controller (handles network game coordination)
+ * 
  * @author Javier Vargas, Group 12
  */
 public class MultiplayerTableController {

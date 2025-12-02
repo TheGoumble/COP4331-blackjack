@@ -4,6 +4,7 @@ import app.SceneRouter;
 import model.ActiveGame;
 import view.DealerTableView;
 /**
+ * MVC PATTERN: This is a Controller (handles game logic and user actions)
  *
  * @author Bridjet Walker
  */

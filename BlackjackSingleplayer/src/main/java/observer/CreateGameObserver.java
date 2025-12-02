@@ -9,6 +9,8 @@ import network.ApiClient;
  * Observer for CreateGame button
  * Starts a new game session as host
  * 
+ * OBSERVER PATTERN: This is a Concrete Observer
+ * 
  * @author Javier Vargas, Group 12
  */
 public class CreateGameObserver implements MenuObserver {

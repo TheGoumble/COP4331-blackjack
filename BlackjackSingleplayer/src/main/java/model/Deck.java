@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 /**
+ * MVC PATTERN: This is a Model (game entity)
  *
  * @author Bridjet Walker
  */

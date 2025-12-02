@@ -5,6 +5,8 @@ import model.GameEngine;
 /**
  * Command to request a card (Hit action)
  * 
+ * COMMAND PATTERN: This is a Concrete Command
+ * 
  * @author Javier Vargas, Group 12
  */
 public class HitCommand implements Command {

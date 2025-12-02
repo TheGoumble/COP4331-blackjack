@@ -9,6 +9,7 @@ import java.util.*;
  * Handles deck, player hands, balances, and game logic
  * Uses Strategy Pattern for different blackjack rule variants
  * 
+ * MVC PATTERN: This is a Model (business logic)
  * STRATEGY PATTERN: This is the Context
  * 
  * @author Group 12

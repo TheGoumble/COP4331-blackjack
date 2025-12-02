@@ -10,7 +10,9 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+
 /**
+ * MVC PATTERN: This is a View (user interface)
  *
  * @author Bridjet Walker, Luca Lombardo
  */
