@@ -10,6 +10,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
+import util.CardType;
 import util.CardVisuals;
 import util.StyleConstants;
 
@@ -137,14 +138,14 @@ public class TutorialView extends BorderPane {
         VBox numberSection = createCardSection(
             "Number Cards (2-10):",
             "Worth their face value",
-            createCardExample(CardVisuals.createLargeCardSymbol("♥", "5", "red"), "=", "5 points")
+            createCardExample(CardVisuals.createCard(CardType.LARGE_VISIBLE, "♥", "5", "red"), "=", "5 points")
         );
         
         // Face Cards Section
         HBox faceCards = new HBox(10, 
-            CardVisuals.createLargeCardSymbol("♠", "K", "black"),
-            CardVisuals.createLargeCardSymbol("♥", "Q", "red"),
-            CardVisuals.createLargeCardSymbol("♣", "J", "black")
+            CardVisuals.createCard(CardType.LARGE_VISIBLE, "♠", "K", "black"),
+            CardVisuals.createCard(CardType.LARGE_VISIBLE, "♥", "Q", "red"),
+            CardVisuals.createCard(CardType.LARGE_VISIBLE, "♣", "J", "black")
         );
         faceCards.setAlignment(Pos.CENTER);
         VBox faceSection = createCardSection(
@@ -155,9 +156,9 @@ public class TutorialView extends BorderPane {
         
         // Aces Section
         HBox aceCards = new HBox(10,
-            CardVisuals.createLargeCardSymbol("♦", "A", "red"),
+            CardVisuals.createCard(CardType.LARGE_VISIBLE, "♦", "A", "red"),
             createOperatorLabel("+"),
-            CardVisuals.createLargeCardSymbol("♠", "9", "black")
+            CardVisuals.createCard(CardType.LARGE_VISIBLE, "♠", "9", "black")
         );
         aceCards.setAlignment(Pos.CENTER);
         VBox acesSection = createCardSection(
@@ -177,14 +178,14 @@ public class TutorialView extends BorderPane {
         
         // Step 2 with visual
         HBox yourCards = new HBox(10, 
-            CardVisuals.createLargeCardSymbol("♠", "K", "black"),
-            CardVisuals.createLargeCardSymbol("♥", "9", "red")
+            CardVisuals.createCard(CardType.LARGE_VISIBLE, "♠", "K", "black"),
+            CardVisuals.createCard(CardType.LARGE_VISIBLE, "♥", "9", "red")
         );
         yourCards.setAlignment(Pos.CENTER);
         
         HBox dealerCards = new HBox(10,
-            CardVisuals.createLargeCardSymbol("♦", "7", "red"),
-            CardVisuals.createLargeHiddenCard()
+            CardVisuals.createCard(CardType.LARGE_VISIBLE, "♦", "7", "red"),
+            CardVisuals.createCard(CardType.LARGE_HIDDEN, null, null, null)
         );
         dealerCards.setAlignment(Pos.CENTER);
         
@@ -285,8 +286,8 @@ public class TutorialView extends BorderPane {
         VBox blackjackSection = createPayoutSection(
             "Blackjack (3:2) - Best Payout!",
             "Getting 21 with your first two cards (Ace + 10-value card)",
-            CardVisuals.createLargeCardSymbol("♠", "A", "black"),
-            CardVisuals.createLargeCardSymbol("♥", "K", "red"),
+            CardVisuals.createCard(CardType.LARGE_VISIBLE, "♠", "A", "black"),
+            CardVisuals.createCard(CardType.LARGE_VISIBLE, "♥", "K", "red"),
             "BLACKJACK!\nBet $10 → Win $15"
         );
         

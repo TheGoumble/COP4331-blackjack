@@ -3,6 +3,7 @@ package view;
 import model.ActiveGame;
 import model.CardInPlay;
 import model.GameResult;
+import util.CardType;
 import util.CardVisuals;
 import util.StyleConstants;
 import view.components.ChipBettingPanel;
@@ -357,13 +358,14 @@ public class DealerTableView extends BorderPane {
         dealerCardsBox.getChildren().clear();
         for (CardInPlay cip : game.getDealerHand().cards()) {
             if (cip.isVisible()) {
-                dealerCardsBox.getChildren().add(CardVisuals.createLargeCardSymbol(
+                dealerCardsBox.getChildren().add(CardVisuals.createCard(
+                    CardType.LARGE_VISIBLE,
                     cip.card().suit().symbol(),
                     cip.card().rank().symbol(),
                     cip.card().suit().isRed() ? "red" : "black"
                 ));
             } else {
-                dealerCardsBox.getChildren().add(CardVisuals.createLargeHiddenCard());
+                dealerCardsBox.getChildren().add(CardVisuals.createCard(CardType.LARGE_HIDDEN, null, null, null));
             }
         }
         dealerTotalLabel.setText("Dealer total: " + game.getDealerTotalVisible());
@@ -371,7 +373,8 @@ public class DealerTableView extends BorderPane {
         // player cards - visual representation
         playerCardsBox.getChildren().clear();
         for (CardInPlay cip : game.getPlayerHand().cards()) {
-            playerCardsBox.getChildren().add(CardVisuals.createLargeCardSymbol(
+            playerCardsBox.getChildren().add(CardVisuals.createCard(
+                CardType.LARGE_VISIBLE,
                 cip.card().suit().symbol(),
                 cip.card().rank().symbol(),
                 cip.card().suit().isRed() ? "red" : "black"

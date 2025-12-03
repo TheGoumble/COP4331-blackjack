@@ -5,6 +5,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import util.CardType;
 import util.CardVisuals;
 import util.StyleConstants;
 
@@ -322,11 +323,11 @@ public class MultiplayerTableView extends BorderPane {
 
         for (int i = 0; i < cards.size(); i++) {
             if (i == 1 && !showAll) {
-                dealerCardsBox.getChildren().add(CardVisuals.createHiddenCard());
+                dealerCardsBox.getChildren().add(CardVisuals.createCard(CardType.STANDARD_HIDDEN, null, null, null));
             } else {
                 Card card = cards.get(i);
                 String color = card.suit().isRed() ? "red" : "black";
-                dealerCardsBox.getChildren().add(CardVisuals.createCardSymbol(card.suit().symbol(), card.rank().symbol(), color));
+                dealerCardsBox.getChildren().add(CardVisuals.createCard(CardType.STANDARD_VISIBLE, card.suit().symbol(), card.rank().symbol(), color));
                 total += card.baseValue();
             }
         }
@@ -569,7 +570,7 @@ public class MultiplayerTableView extends BorderPane {
 
             for (Card card : cards) {
                 String color = card.suit().isRed() ? "red" : "black";
-                cardsBox.getChildren().add(CardVisuals.createCardSymbol(card.suit().symbol(), card.rank().symbol(), color));
+                cardsBox.getChildren().add(CardVisuals.createCard(CardType.STANDARD_VISIBLE, card.suit().symbol(), card.rank().symbol(), color));
                 total += card.baseValue();
             }
 

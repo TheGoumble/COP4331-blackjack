@@ -5,6 +5,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import model.Card;
+import util.CardType;
 import util.CardVisuals;
 
 import java.util.List;
@@ -46,10 +47,11 @@ public class DealerPanel extends VBox {
         
         for (int i = 0; i < cards.size(); i++) {
             if (i == 1 && !showAll) {
-                dealerCardsBox.getChildren().add(CardVisuals.createHiddenCard());
+                dealerCardsBox.getChildren().add(CardVisuals.createCard(CardType.STANDARD_HIDDEN, null, null, null));
             } else {
                 Card card = cards.get(i);
-                dealerCardsBox.getChildren().add(CardVisuals.createCardSymbol(
+                dealerCardsBox.getChildren().add(CardVisuals.createCard(
+                    CardType.STANDARD_VISIBLE,
                     card.suit().symbol(),
                     card.rank().symbol(),
                     card.suit().isRed() ? "red" : "black"

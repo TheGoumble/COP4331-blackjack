@@ -5,17 +5,41 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
 /**
- * Class for creating consistent card visual elements
- * Eliminates code duplication across views
- * 
+ * CREATOR: CardVisuals class
+ * Contains the single FACTORY METHOD
  * @author Group 12
  */
 public class CardVisuals {
     
     /**
+     * FACTORY METHOD - Single method that creates all card types
+     * This is the core of the Factory Method pattern
+     * 
+     * @param type The type of card to create
+     * @param symbol Card symbol (ignored for hidden cards)
+     * @param value Card value (ignored for hidden cards)
+     * @param color Card color (ignored for hidden cards)
+     * @return VBox representing the CONCRETE PRODUCT
+     */
+    public static VBox createCard(CardType type, String symbol, String value, String color) {
+        switch (type) {
+            case STANDARD_VISIBLE:
+                return createStandardVisibleCard(symbol, value, color);
+            case LARGE_VISIBLE:
+                return createLargeVisibleCard(symbol, value, color);
+            case STANDARD_HIDDEN:
+                return createStandardHiddenCard();
+            case LARGE_HIDDEN:
+                return createLargeHiddenCard();
+            default:
+                throw new IllegalArgumentException("Unknown card type: " + type);
+        }
+    }
+    
+    /**
      * Creates a visual card representation with standard styling
      */
-    public static VBox createCardSymbol(String symbol, String value, String color) {
+    private static VBox createStandardVisibleCard(String symbol, String value, String color) {
         Label valueLabel = new Label(value);
         valueLabel.setStyle(
             "-fx-font-size: 12px; " +
@@ -51,7 +75,7 @@ public class CardVisuals {
     /**
      * Creates a large card symbol for dealer/single player views
      */
-    public static VBox createLargeCardSymbol(String symbol, String value, String color) {
+    private static VBox createLargeVisibleCard(String symbol, String value, String color) {
         Label valueLabel = new Label(value);
         valueLabel.setStyle(
             "-fx-font-size: 24px; " +
@@ -87,7 +111,7 @@ public class CardVisuals {
     /**
      * Creates a hidden (face-down) card for dealer
      */
-    public static VBox createHiddenCard() {
+    private static VBox createStandardHiddenCard() {
         Label hiddenLabel = new Label("?");
         hiddenLabel.setStyle(
             "-fx-font-size: 20px; " +
@@ -116,7 +140,7 @@ public class CardVisuals {
     /**
      * Creates a large hidden card for dealer/single player views
      */
-    public static VBox createLargeHiddenCard() {
+    private static VBox createLargeHiddenCard() {
         Label hiddenLabel = new Label("?");
         hiddenLabel.setStyle(
             "-fx-font-size: 32px; " +

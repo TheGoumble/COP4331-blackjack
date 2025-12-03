@@ -5,6 +5,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import model.Card;
+import util.CardType;
 import util.CardVisuals;
 
 import java.util.List;
@@ -95,7 +96,8 @@ public class PlayerPanel extends VBox {
             cardsBox.getChildren().add(emptyLabel);
         } else {
             for (Card card : cards) {
-                VBox cardVisual = CardVisuals.createCardSymbol(
+                VBox cardVisual = CardVisuals.createCard(
+                    CardType.STANDARD_VISIBLE,
                     card.suit().symbol(),
                     card.rank().symbol(),
                     card.suit().isRed() ? "red" : "black"
