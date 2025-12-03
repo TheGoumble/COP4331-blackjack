@@ -88,7 +88,6 @@ public class PlayerPanel extends VBox {
 
     public void updateCards(List<Card> cards) {
         cardsBox.getChildren().clear();
-        int total = 0;
 
         if (cards.isEmpty()) {
             Label emptyLabel = new Label("No cards");
@@ -105,10 +104,10 @@ public class PlayerPanel extends VBox {
                 cardVisual.setScaleX(0.6);
                 cardVisual.setScaleY(0.6);
                 cardsBox.getChildren().add(cardVisual);
-                total += card.baseValue();
             }
         }
 
+        int total = calculateHandValue(cards);
         totalLabel.setText("Total: " + total);
     }
 
@@ -137,5 +136,29 @@ public class PlayerPanel extends VBox {
 
     public String getDisplayName() {
         return nameLabel.getText();
+    }
+    
+    /**
+     * Calculate hand value handling Aces properly (1 or 11)
+     */
+    private int calculateHandValue(List<Card> cards) {
+        int value = 0;
+        int aces = 0;
+        
+        for (Card card : cards) {
+            int cardValue = card.baseValue();
+            if (cardValue == 11) {
+                aces++;
+            }
+            value += cardValue;
+        }
+        
+        // Adjust for Aces
+        while (value > 21 && aces > 0) {
+            value -= 10;
+            aces--;
+        }
+        
+        return value;
     }
 }

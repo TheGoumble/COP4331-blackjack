@@ -384,8 +384,12 @@ public class DealerTableView extends BorderPane {
 
         balanceLabel.setText("Balance:\n$" + game.getBalance());
         betInfoLabel.setText("In Play:\n$" + game.getCurrentBet());
+        
+        // Update betting panel with current balance for ALL-IN chip
+        bettingPanel.setPlayerBalance(game.getBalance());
 
-        if (game.isGameOver()) {
+        // Only trigger game over if not in a round (balance check after round ends)
+        if (game.isGameOver() && !game.isRoundInProgress()) {
             bettingPanel.setButtonsEnabled(false);
             hitButton.setDisable(true);
             standButton.setDisable(true);

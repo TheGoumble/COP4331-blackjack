@@ -261,8 +261,10 @@ public class GameEngine {
      * Play dealer's turn (hits on 16 or less, stands on 17+)
      */
     public void playDealerTurn() {
-        while (calculateHandValue(dealerHand) < 17) {
+        int dealerValue = calculateHandValue(dealerHand);
+        while (dealerValue < 17) {
             dealerHand.add(deck.deal());
+            dealerValue = calculateHandValue(dealerHand);
         }
     }
     

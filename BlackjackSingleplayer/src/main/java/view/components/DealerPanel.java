@@ -8,6 +8,7 @@ import model.Card;
 import util.CardType;
 import util.CardVisuals;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,7 +44,7 @@ public class DealerPanel extends VBox {
      */
     public void updateDealer(List<Card> cards, boolean showAll) {
         dealerCardsBox.getChildren().clear();
-        int total = 0;
+        List<Card> visibleCards = new ArrayList<>();
         
         for (int i = 0; i < cards.size(); i++) {
             if (i == 1 && !showAll) {
@@ -56,10 +57,11 @@ public class DealerPanel extends VBox {
                     card.rank().symbol(),
                     card.suit().isRed() ? "red" : "black"
                 ));
-                total += card.baseValue();
+                visibleCards.add(card);
             }
         }
         
+        int total = calculateHandValue(visibleCards);
         dealerTotalLabel.setText(showAll ? "Total: " + total : "Total: ?");
     }
     
@@ -69,5 +71,29 @@ public class DealerPanel extends VBox {
     public void clear() {
         dealerCardsBox.getChildren().clear();
         dealerTotalLabel.setText("Total: 0");
+    }
+    
+    /**
+     * Calculate hand value handling Aces properly (1 or 11)
+     */
+    private int calculateHandValue(List<Card> cards) {
+        int value = 0;
+        int aces = 0;
+        
+        for (Card card : cards) {
+            int cardValue = card.baseValue();
+            if (cardValue == 11) {
+                aces++;
+            }
+            value += cardValue;
+        }
+        
+        // Adjust for Aces
+        while (value > 21 && aces > 0) {
+            value -= 10;
+            aces--;
+        }
+        
+        return value;
     }
 }
